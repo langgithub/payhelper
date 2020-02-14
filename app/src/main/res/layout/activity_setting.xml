@@ -64,7 +64,7 @@
                     android:layout_width="0dip"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
-                    android:text="同步地址" />
+                    android:text="短信回调地址" />
 
                 <EditText
                     android:id="@+id/notify_sms"
@@ -86,7 +86,7 @@
                     android:layout_width="0dip"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
-                    android:text="异步地址" />
+                    android:text="支付宝回调地址" />
 
                 <EditText
                     android:id="@+id/notify_zfb"
@@ -116,7 +116,8 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="5"
                     android:ellipsize="end"
-                    android:singleLine="true" />
+                    android:singleLine="true"
+                    android:text="不用管这项"/>
             </LinearLayout>
 
             <LinearLayout

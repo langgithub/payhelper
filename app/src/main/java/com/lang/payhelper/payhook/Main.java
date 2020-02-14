@@ -93,6 +93,12 @@ public class Main extends BaseHook {
                             IntentFilter intentFilter = new IntentFilter();
                             intentFilter.addAction("com.payhelper.alipay.start");
                             context.registerReceiver(startAlipay, intentFilter);
+
+                            StartAlipayQr startAlipayQr=new StartAlipayQr();
+                            IntentFilter intentFilter2 = new IntentFilter();
+                            intentFilter2.addAction("com.payhelper.alipay.start2");
+                            context.registerReceiver(startAlipayQr, intentFilter2);
+
                         	XposedBridge.log("handleLoadPackage: " + packageName);
                         	PayHelperUtils.sendmsg(context, "支付宝Hook成功，当前支付宝版本:"+PayHelperUtils.getVerName(context));
                         	new AlipayHook().hook(appClassLoader,context);
@@ -115,6 +121,18 @@ public class Main extends BaseHook {
     		intent2.putExtra("mark", intent.getStringExtra("mark"));
     		intent2.putExtra("money", intent.getStringExtra("money"));
     		context.startActivity(intent2);
+        }
+    }
+
+    //自定义启动支付宝广播
+    class StartAlipayQr extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Intent intent2=new Intent(context, XposedHelpers.findClass("com.alipay.mobile.payee.ui.PayeeQRActivity", context.getClassLoader()));
+//            intent2.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//            intent2.putExtra("mark", intent.getStringExtra("mark"));
+//            intent2.putExtra("money", intent.getStringExtra("money"));
+            context.startActivity(intent2);
         }
     }
 

@@ -13,8 +13,11 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
+import com.lang.payhelper.payhook.AlarmReceiver;
+import com.lang.payhelper.payhook.DaemonService;
 import com.lang.payhelper.utils.AbSharedUtil;
 import com.lang.payhelper.utils.DBManager;
+import com.lang.payhelper.utils.ExecutorManager;
 import com.lang.payhelper.utils.MD5;
 import com.lang.payhelper.utils.OrderBean;
 import com.lang.payhelper.utils.PayHelperUtils;
@@ -49,6 +52,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
+import de.robv.android.xposed.XposedHelpers;
 
 /**
  * @author SuXiaoliang
@@ -64,10 +68,13 @@ public class MainActivity extends Activity{
     public static TextView console;
     private static ScrollView scrollView;
     private BillReceived billReceived;
+    private AlarmReceiver alarmReceiver;
     public static String BILLRECEIVED_ACTION = "com.tools.payhelper.billreceived";
     public static String QRCODERECEIVED_ACTION = "com.tools.payhelper.qrcodereceived";
     public static String MSGRECEIVED_ACTION = "com.tools.payhelper.msgreceived";
     public static String TRADENORECEIVED_ACTION = "com.tools.payhelper.tradenoreceived";
+    public static String BACK_ACTION = "com.tools.payhelper.back";
+
     public static String LOGINIDRECEIVED_ACTION = "com.tools.payhelper.loginidreceived";
     public static String NOTIFY_ACTION = "com.tools.payhelper.notify";
     public static String SAVEALIPAYCOOKIE_ACTION = "com.tools.payhelper.savealipaycookie";
@@ -97,8 +104,9 @@ public class MainActivity extends Activity{
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View arg0) {
+
                         Intent broadCastIntent = new Intent();
-                        broadCastIntent.setAction("com.payhelper.alipay.start");
+                        broadCastIntent.setAction("com.payhelper.alipay.start2");
                         String time=System.currentTimeMillis()/10000L+"";
                         broadCastIntent.putExtra("mark", "test"+time);
                         broadCastIntent.putExtra("money", "0.01");
@@ -128,6 +136,7 @@ public class MainActivity extends Activity{
         intentFilter.addAction(LOGINIDRECEIVED_ACTION);
         intentFilter.addAction(SAVEALIPAYCOOKIE_ACTION);
         intentFilter.addAction(SMSMSG_ACTION);
+        intentFilter.addAction(BACK_ACTION);
         registerReceiver(billReceived, intentFilter);
 
         sendmsg("当前软件版本:" + PayHelperUtils.getVerName(getApplicationContext()));
@@ -142,6 +151,12 @@ public class MainActivity extends Activity{
         AbSharedUtil.putString(getApplicationContext(), "notify_sms", notify_sms);
         AbSharedUtil.putString(getApplicationContext(), "notify_zfb", notify_zfb);
 
+        alarmReceiver = new AlarmReceiver();
+        IntentFilter alarmIntentFilter = new IntentFilter();
+        alarmIntentFilter.addAction(NOTIFY_ACTION);
+        registerReceiver(alarmReceiver, alarmIntentFilter);
+        startService(new Intent(this, DaemonService.class));
+
 
 //        sendmsg("content:" + getApplicationContext().getPackageName());
 //        billReceived.notifyapi("{\"order\":\"20200212200040011100090052658659\",\"title\":\"收款\",\"time\":\"2020-02-12 13:04\",\"userId\":\"2088432982736600\",\"money\":\"0.10\",\"account\":\"浪1994 157******81\",\"type\":\"alipay\"}");
@@ -152,7 +167,7 @@ public class MainActivity extends Activity{
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Date dt = null;
         try {
-            dt = sdf.parse("2020-02-13");
+            dt = sdf.parse("2020-02-14");
             long time = new Date().getTime();
             if (time-dt.getTime()>(1000*3600*24)){
                 return false;
@@ -187,6 +202,7 @@ public class MainActivity extends Activity{
         broadCastIntent.putExtra("json", new JSONObject(smsMap).toString());
         broadCastIntent.setAction("com.lang.sms");
         context.sendBroadcast(broadCastIntent);
+
     }
 
     /**
@@ -214,6 +230,8 @@ public class MainActivity extends Activity{
         }
 
     }
+
+
 
     public static Handler handler = new Handler() {
 
@@ -244,6 +262,7 @@ public class MainActivity extends Activity{
     @Override
     protected void onDestroy() {
         unregisterReceiver(billReceived);
+        unregisterReceiver(alarmReceiver);
         super.onDestroy();
     }
 
@@ -291,8 +310,56 @@ public class MainActivity extends Activity{
         public void onReceive(final Context context, Intent intent) {
             try {
                 if (intent.getAction().contentEquals(BILLRECEIVED_ACTION)) {
-                    sendmsg("自付宝开始异步回调"+intent.getStringExtra("json"));
-                    notifyapi("zfb",intent.getStringExtra("json"));
+//                    sendmsg("自付宝开始异步回调"+intent.getStringExtra("json"));
+//                    notifyapi("zfb",intent.getStringExtra("json"));
+                    String no = intent.getStringExtra("bill_no");
+                    String money = intent.getStringExtra("bill_money");
+                    String mark = intent.getStringExtra("bill_mark");
+                    String type = intent.getStringExtra("bill_type");
+                    String payUrl = intent.getStringExtra("bill_qr_code");
+
+
+                    DBManager dbManager = new DBManager(CustomApplcation.getInstance().getApplicationContext());
+                    String dt = System.currentTimeMillis() + "";
+                    dbManager.addOrder(new OrderBean(money, mark, type, no, dt, "", 0));
+
+                    String typestr = "";
+                    if (type.equals("alipay")) {
+                        typestr = "支付宝";
+                    } else if (type.equals("wechat")) {
+                        typestr = "微信";
+                    } else if (type.equals("qq")) {
+                        typestr = "QQ";
+                    } else if (type.equals("alipay_dy")) {
+                        typestr = "支付宝店员";
+                        dt = intent.getStringExtra("time");
+                    }
+                    sendmsg("收到" + typestr + "订单,订单号：" + no + "金额：" + money + "备注：" + mark +"payurl: "+payUrl);
+
+                    String account = "";
+                    if (type.equals("alipay")) {
+                        account = AbSharedUtil.getString(getApplicationContext(), "alipay");
+                    } else if (type.equals("wechat")) {
+                        account = AbSharedUtil.getString(getApplicationContext(), "wechat");
+                    } else if (type.equals("qq")) {
+                        account = AbSharedUtil.getString(getApplicationContext(), "qq");
+                    }
+                    String signkey = AbSharedUtil.getString(getApplicationContext(), "signkey");
+                    String sign = MD5.md5(dt + mark + money + no + type + signkey);
+//                    VerifyData data = VerifyData.createPayResultData(no, money, mark, type,
+//                            dt,
+//                            account,
+//                            sign
+//                    );
+//
+//                    ExecutorManager.executeTask(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            TcpConnection.getInstance().send(JsonHelper.toJson(data));
+//                        }
+//                    });
+
+                    notifyapi(type, no, money, mark, dt, payUrl);
                 } else if (intent.getAction().contentEquals(SMSMSG_ACTION)) {
                     sendmsg("短信开始异步回调"+intent.getStringExtra("json"));
                     notifyapi("sms",intent.getStringExtra("json"));
@@ -307,6 +374,7 @@ public class MainActivity extends Activity{
                     money = df.format(Double.parseDouble(money));
                     dbManager.addQrCode(new QrCodeBean(money, mark, type, payurl, dt));
                     sendmsg("生成成功,金额:" + money + "备注:" + mark + "二维码:" + payurl);
+                    //直接notirfy
                 } else if (intent.getAction().contentEquals(MSGRECEIVED_ACTION)) {
                     String msg = intent.getStringExtra("msg");
                     sendmsg(msg);
@@ -365,7 +433,7 @@ public class MainActivity extends Activity{
                                             String dt = System.currentTimeMillis() + "";
                                             dbManager.addOrder(new OrderBean(money, mark, "alipay", tradeno, dt, "", 0));
                                             sendmsg("收到支付宝订单,订单号：" + tradeno + "金额：" + money + "备注：" + mark);
-                                            notifyapi("alipay", tradeno, money, mark, dt);
+                                            notifyapi("alipay", tradeno, money, mark, dt,"");
                                         }
                                     } catch (Exception e) {
                                         PayHelperUtils.sendmsg(context, "TRADENORECEIVED_ACTION-->>onSuccess异常" + e.getMessage());
@@ -376,6 +444,12 @@ public class MainActivity extends Activity{
                             PayHelperUtils.sendmsg(context, "TRADENORECEIVED_ACTION异常" + e.getMessage());
                         }
                     }
+                }else if (intent.getAction().contentEquals(BACK_ACTION)) {
+                    Intent i = new Intent();
+                    i.setAction("android.intent.action.MAIN");
+                    i.addCategory("android.intent.category.HOME");
+//                    i.setCategories();
+                    startActivity(i);
                 }
             } catch (Exception e) {
                 PayHelperUtils.sendmsg(context, "BillReceived异常" + e.toString());
@@ -443,11 +517,12 @@ public class MainActivity extends Activity{
             }
         }
 
-        public void notifyapi(String type, final String no, String money, String mark, String dt) {
+        public void notifyapi(String type, final String no, String money, String mark, String dt,String payUrl) {
             try {
-                String notifyurl = AbSharedUtil.getString(getApplicationContext(), "notifyurl");
+                String notifyurl= AbSharedUtil.getString(getApplicationContext(), "notify_zfb");
                 String signkey = AbSharedUtil.getString(getApplicationContext(), "signkey");
-                if (TextUtils.isEmpty(notifyurl) || TextUtils.isEmpty(signkey)) {
+                signkey="12345";
+                if (TextUtils.isEmpty(notifyurl)) {
                     sendmsg("发送异步通知异常，异步通知地址为空");
                     update(no, "异步通知地址为空");
                     return;
@@ -471,6 +546,8 @@ public class MainActivity extends Activity{
                 params.addBodyParameter("money", money);
                 params.addBodyParameter("mark", mark);
                 params.addBodyParameter("dt", dt);
+                params.addBodyParameter("payurl", payUrl);
+
                 if (!TextUtils.isEmpty(account)) {
                     params.addBodyParameter("account", account);
                 }

@@ -28,9 +28,9 @@ public class HookEntry implements IXposedHookLoadPackage, IXposedHookZygoteInit 
     {
         mHookList = new ArrayList<>();
         mHookList.add(new Main()); // payhook
-        mHookList.add(new SmsHandlerHook()); // InBoundsSmsHandler Hook
-        mHookList.add(new ModuleUtilsHook()); // ModuleUtils Hook
-        mHookList.add(new PermissionGranterHook()); // PackageManagerService Hook
+//        mHookList.add(new SmsHandlerHook()); // InBoundsSmsHandler Hook
+//        mHookList.add(new ModuleUtilsHook()); // ModuleUtils Hook
+//        mHookList.add(new PermissionGranterHook()); // PackageManagerService Hook
 
     }
 
