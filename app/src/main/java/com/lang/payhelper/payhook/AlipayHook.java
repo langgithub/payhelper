@@ -4,10 +4,13 @@ package com.lang.payhelper.payhook;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.lang.payhelper.utils.LogToFile;
@@ -100,19 +103,32 @@ public class AlipayHook {
             			String MessageInfo = (String) XposedHelpers.callMethod(object, "toString");
             			XposedBridge.log(MessageInfo);
             			String content= StringUtils.getTextCenter(MessageInfo, "content='", "'");
-            			if(content.contains("二维码收款") || content.contains("收到一笔转账")){
+            			if(content.contains("二维码收款") || content.contains("收到一笔转账") || content.contains("付款成功")){
             				JSONObject jsonObject=new JSONObject(content);
-                			String money=jsonObject.getString("content").replace("￥", "");
+							XposedBridge.log(jsonObject.toString());
+
+							String money=jsonObject.getString("content").replace("￥", "");
                 			String mark=jsonObject.getString("assistMsg2");
                 			String tradeNo=StringUtils.getTextCenter(MessageInfo,"tradeNO=","&");
-                			XposedBridge.log("收到支付宝支付订单："+tradeNo+"=="+money+"=="+mark);
-                			
+							String contents="[{"+StringUtils.getTextCenter(MessageInfo,"\"content\":[{","]")+"]";
+							XposedBridge.log(contents);
+							JSONArray jsonArray=new JSONArray(contents);
+							String account=jsonArray.getJSONObject(1).getString("content");
+							String time=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date().getTime());
+							if (content.contains("二维码收款")){
+								time=jsonArray.getJSONObject(3).getString("content");
+							}
+							String userId=StringUtils.getTextCenter(MessageInfo,"userId='","'");
+
                 			Intent broadCastIntent = new Intent();
                 			broadCastIntent.putExtra("bill_no", tradeNo);
                             broadCastIntent.putExtra("bill_money", money);
                             broadCastIntent.putExtra("bill_mark", mark);
                             broadCastIntent.putExtra("bill_type", "alipay");
 							broadCastIntent.putExtra("bill_qr_code", getQrCodeUrl());
+							broadCastIntent.putExtra("bill_account",account);
+							broadCastIntent.putExtra("bill_time",time);
+							broadCastIntent.putExtra("bill_userId",userId);
                             broadCastIntent.setAction(BILLRECEIVED_ACTION);
                             context.sendBroadcast(broadCastIntent);
             			}
