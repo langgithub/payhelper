@@ -30,7 +30,7 @@ import com.lang.payhelper.utils.AbSharedUtil;
  */
 public class SettingActivity extends Activity implements OnClickListener{
 	
-	private EditText tv_notify_sms,tv_notify_zfb,et_signkey,et_wxid;
+	private EditText tv_notify_sms,tv_notify_zfb,address,et_wxid;
 	private Button bt_save,bt_back;
 	private RelativeLayout rl_back;
 	
@@ -41,7 +41,7 @@ public class SettingActivity extends Activity implements OnClickListener{
 		setContentView(R.layout.activity_setting);
 		tv_notify_sms=(EditText) findViewById(R.id.notify_sms);
 		tv_notify_zfb=(EditText) findViewById(R.id.notify_zfb);
-		et_signkey=(EditText) findViewById(R.id.signkey);
+		address=(EditText) findViewById(R.id.address);
 		et_wxid=(EditText) findViewById(R.id.et_wxid);
 		if(!TextUtils.isEmpty(AbSharedUtil.getString(getApplicationContext(), "notify_sms"))){
 			tv_notify_sms.setText(AbSharedUtil.getString(getApplicationContext(), "notify_sms"));
@@ -49,8 +49,8 @@ public class SettingActivity extends Activity implements OnClickListener{
 		if(!TextUtils.isEmpty(AbSharedUtil.getString(getApplicationContext(), "notify_zfb"))){
 			tv_notify_zfb.setText(AbSharedUtil.getString(getApplicationContext(), "notify_zfb"));
 		}
-		if(!TextUtils.isEmpty(AbSharedUtil.getString(getApplicationContext(), "signkey"))){
-			et_signkey.setText(AbSharedUtil.getString(getApplicationContext(), "signkey"));
+		if(!TextUtils.isEmpty(AbSharedUtil.getString(getApplicationContext(), "address"))){
+			address.setText(AbSharedUtil.getString(getApplicationContext(), "address"));
 		}
 		if(!TextUtils.isEmpty(AbSharedUtil.getString(getApplicationContext(), "account"))){
 			et_wxid.setText(AbSharedUtil.getString(getApplicationContext(), "account"));
@@ -93,12 +93,12 @@ public class SettingActivity extends Activity implements OnClickListener{
 				AbSharedUtil.putString(getApplicationContext(), "notify_zfb", notify_zfb);
 //			}
 			Log.i("url",AbSharedUtil.getString(getApplicationContext(), "notify_zfb"));
-			String signkey=et_signkey.getText().toString();
+			String _address=address.getText().toString();
 //			if(TextUtils.isEmpty(signkey)){
 //				Toast.makeText(getApplicationContext(), "signkey不能为空！", Toast.LENGTH_LONG).show();
 //				return;
 //			}else{
-				AbSharedUtil.putString(getApplicationContext(), "signkey", signkey);
+				AbSharedUtil.putString(getApplicationContext(), "address", _address);
 //			}
 			String wxid=et_wxid.getText().toString();
 			if(!TextUtils.isEmpty(wxid)){
@@ -108,6 +108,7 @@ public class SettingActivity extends Activity implements OnClickListener{
 
 			Intent broadCastIntent = new Intent();
 			broadCastIntent.setAction("com.payhelper.tcp.start");
+			broadCastIntent.putExtra("address",_address);
 			sendBroadcast(broadCastIntent);
 
 			finish();

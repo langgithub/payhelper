@@ -108,16 +108,16 @@
                     android:layout_width="0dip"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
-                    android:text="signkey" />
+                    android:text="服务器地址" />
 
                 <EditText
-                    android:id="@+id/signkey"
+                    android:id="@+id/address"
                     android:layout_width="0dip"
                     android:layout_height="wrap_content"
                     android:layout_weight="5"
                     android:ellipsize="end"
                     android:singleLine="true"
-                    android:text="不用管这项"/>
+                    android:text="139.129.119.106"/>
             </LinearLayout>
 
             <LinearLayout

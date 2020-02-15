@@ -6,7 +6,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.json.JSONObject;
@@ -14,7 +13,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
-import com.lang.payhelper.handler.ZfbHandler;
 import com.lang.payhelper.payhook.AlarmReceiver;
 import com.lang.payhelper.payhook.DaemonService;
 import com.lang.payhelper.utils.AbSharedUtil;
@@ -23,7 +21,6 @@ import com.lang.payhelper.utils.MD5;
 import com.lang.payhelper.utils.OrderBean;
 import com.lang.payhelper.utils.PayHelperUtils;
 import com.lang.payhelper.utils.QrCodeBean;
-import com.lang.sekiro.netty.client.SekiroClient;
 import com.lidroid.xutils.HttpUtils;
 import com.lidroid.xutils.exception.HttpException;
 import com.lidroid.xutils.http.RequestParams;
@@ -31,7 +28,6 @@ import com.lidroid.xutils.http.ResponseInfo;
 import com.lidroid.xutils.http.callback.RequestCallBack;
 import com.lidroid.xutils.http.client.HttpRequest.HttpMethod;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -45,16 +41,13 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
-import de.robv.android.xposed.XposedHelpers;
 
 /**
  * @author SuXiaoliang
@@ -102,32 +95,20 @@ public class MainActivity extends Activity{
         console = (TextView) findViewById(R.id.console);
         scrollView = (ScrollView) findViewById(R.id.scrollview);
 
-        this.findViewById(R.id.start_alipay).setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View arg0) {
+        findViewById(R.id.start_alipay).setOnClickListener(arg0 -> {
+            Intent broadCastIntent = new Intent();
+            broadCastIntent.setAction("com.payhelper.alipay.start");
+            String time=System.currentTimeMillis()/10000L+"";
+            //动态请求返回
+            broadCastIntent.putExtra("mark", "test"+time);
+            broadCastIntent.putExtra("money", "0.01");
+            sendBroadcast(broadCastIntent);
+        });
 
-                        Intent broadCastIntent = new Intent();
-                        broadCastIntent.setAction("com.payhelper.alipay.start");
-                        String time=System.currentTimeMillis()/10000L+"";
-                        //动态请求返回
-                        broadCastIntent.putExtra("mark", "test"+time);
-                        broadCastIntent.putExtra("money", "0.01");
-                        sendBroadcast(broadCastIntent);
-//                        request(ALIPAY);
-                    }
-                });
-
-        this.findViewById(R.id.setting).setOnClickListener(
-                new View.OnClickListener() {
-
-                    @Override
-                    public void onClick(View arg0) {
-                        Intent intent = new Intent(MainActivity.this, SettingActivity.class);
-                        startActivity(intent);
-                    }
-                });
-
+        findViewById(R.id.setting).setOnClickListener(arg0 -> {
+            Intent intent = new Intent(MainActivity.this, SettingActivity.class);
+            startActivity(intent);
+         });
 
         //注册广播
         billReceived = new BillReceived();
@@ -205,7 +186,6 @@ public class MainActivity extends Activity{
         broadCastIntent.putExtra("json", new JSONObject(smsMap).toString());
         broadCastIntent.setAction("com.lang.sms");
         context.sendBroadcast(broadCastIntent);
-
     }
 
     /**
@@ -233,8 +213,6 @@ public class MainActivity extends Activity{
         }
 
     }
-
-
 
     public static Handler handler = new Handler() {
 
@@ -273,7 +251,6 @@ public class MainActivity extends Activity{
     protected void onResume() {
         super.onResume();
     }
-
 
     public static void sendmsg(String txt) {
 //        LogToFile.i("payhelper", txt);
