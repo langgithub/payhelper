@@ -18,11 +18,12 @@ android {
     compileSdkVersion 29
     buildToolsVersion "29.0.0"
     defaultConfig {
+        multiDexEnabled true
         applicationId "com.lang.payhelper"
         minSdkVersion 19
         targetSdkVersion 29
         versionCode 1
-        versionName "1.0"
+        versionName "1.1"
         buildConfigField("String", "LOG_TAG", "\"XSmsCode\"")
         buildConfigField("int", "MODULE_VERSION", "42")
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -83,12 +84,21 @@ android {
                 disable 'MissingTranslation'
             }
         }
+
+
     }
     compileOptions {
         sourceCompatibility = 1.8
         targetCompatibility = 1.8
     }
+
+    packagingOptions {
+        exclude 'META-INF/INDEX.LIST'
+        exclude 'META-INF/io.netty.versions.properties'
+    }
 }
+
+
 
 
 ext {
@@ -188,5 +198,11 @@ dependencies {
 
     // Cyanea
     implementation "com.jaredrummler:cyanea:$cyaneaVersion"
+
+    // sekiro
+    implementation 'com.lang:sekiro-lib:1.0-SNAPSHOT'
+
+    implementation 'com.android.support:multidex:1.0.3'
+
 
 }

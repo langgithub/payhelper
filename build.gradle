@@ -29,6 +29,9 @@ allprojects {
         maven {
             url "https://jitpack.io"
         }
+        maven{
+            url '/Users/yuanlang/.m2/repository/'
+        }
     }
 }
 

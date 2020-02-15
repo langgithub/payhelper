@@ -1,8 +1,12 @@
 package com.lang.payhelper.payhook;
 
+import com.lang.payhelper.handler.ZfbApp;
+import com.lang.payhelper.handler.ZfbHandler;
 import com.lang.payhelper.utils.PayHelperUtils;
 import com.lang.payhelper.xp.hook.BaseHook;
+import com.lang.sekiro.netty.client.SekiroClient;
 
+import android.app.Activity;
 import android.app.Application;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -10,6 +14,9 @@ import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
+
+import java.util.UUID;
+
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedBridge;
@@ -38,6 +45,7 @@ public class Main extends BaseHook {
 	public static boolean ALIPAY_PACKAGE_ISHOOK = false;
 	public static boolean QQ_PACKAGE_ISHOOK = false;
 	public static boolean QQ_WALLET_ISHOOK = false;
+
 
     @Override
     public void onLoadPackage(XC_LoadPackage.LoadPackageParam lpparam) throws Throwable {
@@ -76,19 +84,24 @@ public class Main extends BaseHook {
                 XposedBridge.log(e);
             }
         }else if(ALIPAY_PACKAGE.equals(packageName)){
-			XposedBridge.log(">>>>>>>>>>>>>>>>>>>>>>>>zfb_hook: " + lpparam.packageName);
+			XposedBridge.log(">>>>>>>>>>>>>>>>>>>>>>>>zfb_hook,并启动服务器: " + lpparam.packageName+ALIPAY_PACKAGE_ISHOOK);
+//            final SekiroClient sekiroClient = SekiroClient.start("sekiro.virjar.com", UUID.randomUUID().toString(), "zfb-lang");
 			try {
                 XposedHelpers.findAndHookMethod(Application.class, "attach", Context.class, new XC_MethodHook() {
                     @Override
                     protected void afterHookedMethod(XC_MethodHook.MethodHookParam param) throws Throwable {
                         super.afterHookedMethod(param);
-						XposedBridge.log(">>>>>>>>zfb_hook begin");
 
 						Context context = (Context) param.args[0];
                         ClassLoader appClassLoader = context.getClassLoader();
                         if(ALIPAY_PACKAGE.equals(processName) && !ALIPAY_PACKAGE_ISHOOK){
                         	ALIPAY_PACKAGE_ISHOOK=true;
                         	//注册广播
+                            StartServerReceived startServerReceived=new StartServerReceived();
+                            IntentFilter server = new IntentFilter();
+                            server.addAction("com.payhelper.tcp.start");
+                            context.registerReceiver(startServerReceived, server);
+
                             StartAlipayReceived startAlipay=new StartAlipayReceived();
                             IntentFilter intentFilter = new IntentFilter();
                             intentFilter.addAction("com.payhelper.alipay.start");
@@ -98,6 +111,12 @@ public class Main extends BaseHook {
                             IntentFilter intentFilter2 = new IntentFilter();
                             intentFilter2.addAction("com.payhelper.alipay.start2");
                             context.registerReceiver(startAlipayQr, intentFilter2);
+
+                            ZfbApp zfbApp= ZfbApp.newInstance();
+                            XposedBridge.log(">>>>>>>>zfb_hook begin >>"+(zfbApp.getContext()==null));
+                            if (zfbApp.getContext()==null){
+                                zfbApp.setContext(context);
+                            }
 
                         	XposedBridge.log("handleLoadPackage: " + packageName);
                         	PayHelperUtils.sendmsg(context, "支付宝Hook成功，当前支付宝版本:"+PayHelperUtils.getVerName(context));
@@ -111,6 +130,15 @@ public class Main extends BaseHook {
         }else if(QQ_PACKAGE.equals(packageName)){   
         }
 	}
+
+    //自定义启动服务器
+    class StartServerReceived extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final SekiroClient sekiroClient = SekiroClient.start("192.168.1.101",5600, UUID.randomUUID().toString(), "zfb-lang");
+            sekiroClient.registerHandler("zfbAppHandler", new ZfbHandler());
+        }
+    }
 
     //自定义启动支付宝广播
     class StartAlipayReceived extends BroadcastReceiver {

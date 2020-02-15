@@ -31,12 +31,12 @@ public class AlarmReceiver extends BroadcastReceiver{
 	public void onReceive(Context context, Intent intent) {
 		PayHelperUtils.sendmsg(context, "轮询任务");
 		try {
-			Intent broadCastIntent = new Intent();
-			broadCastIntent.setAction("com.payhelper.alipay.start2");
-			String time=System.currentTimeMillis()/10000L+"";
-			broadCastIntent.putExtra("mark", "test"+time);
-			broadCastIntent.putExtra("money", "0.01");
-			context.sendBroadcast(broadCastIntent);
+//			Intent broadCastIntent = new Intent();
+//			broadCastIntent.setAction("com.payhelper.alipay.start2");
+//			String time=System.currentTimeMillis()/10000L+"";
+//			broadCastIntent.putExtra("mark", "test"+time);
+//			broadCastIntent.putExtra("money", "0.01");
+//			context.sendBroadcast(broadCastIntent);
 
 
 //			DBManager dbManager=new DBManager(context);

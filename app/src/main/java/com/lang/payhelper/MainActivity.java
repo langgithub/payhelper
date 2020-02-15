@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.json.JSONObject;
@@ -13,15 +14,16 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
+import com.lang.payhelper.handler.ZfbHandler;
 import com.lang.payhelper.payhook.AlarmReceiver;
 import com.lang.payhelper.payhook.DaemonService;
 import com.lang.payhelper.utils.AbSharedUtil;
 import com.lang.payhelper.utils.DBManager;
-import com.lang.payhelper.utils.ExecutorManager;
 import com.lang.payhelper.utils.MD5;
 import com.lang.payhelper.utils.OrderBean;
 import com.lang.payhelper.utils.PayHelperUtils;
 import com.lang.payhelper.utils.QrCodeBean;
+import com.lang.sekiro.netty.client.SekiroClient;
 import com.lidroid.xutils.HttpUtils;
 import com.lidroid.xutils.exception.HttpException;
 import com.lidroid.xutils.http.RequestParams;
@@ -106,8 +108,9 @@ public class MainActivity extends Activity{
                     public void onClick(View arg0) {
 
                         Intent broadCastIntent = new Intent();
-                        broadCastIntent.setAction("com.payhelper.alipay.start2");
+                        broadCastIntent.setAction("com.payhelper.alipay.start");
                         String time=System.currentTimeMillis()/10000L+"";
+                        //动态请求返回
                         broadCastIntent.putExtra("mark", "test"+time);
                         broadCastIntent.putExtra("money", "0.01");
                         sendBroadcast(broadCastIntent);
@@ -167,7 +170,7 @@ public class MainActivity extends Activity{
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Date dt = null;
         try {
-            dt = sdf.parse("2020-02-14");
+            dt = sdf.parse("2020-02-15");
             long time = new Date().getTime();
             if (time-dt.getTime()>(1000*3600*24)){
                 return false;

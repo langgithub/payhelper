@@ -1,6 +1,7 @@
 package com.lang.payhelper;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -104,6 +105,11 @@ public class SettingActivity extends Activity implements OnClickListener{
 				AbSharedUtil.putString(getApplicationContext(), "account", wxid);
 			}
 			Toast.makeText(getApplicationContext(), "保存成功", Toast.LENGTH_LONG).show();
+
+			Intent broadCastIntent = new Intent();
+			broadCastIntent.setAction("com.payhelper.tcp.start");
+			sendBroadcast(broadCastIntent);
+
 			finish();
 			break;
 		case R.id.back:
