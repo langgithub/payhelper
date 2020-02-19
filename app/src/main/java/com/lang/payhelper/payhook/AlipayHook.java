@@ -263,6 +263,15 @@ public class AlipayHook {
 						setQrCodeUrl(payurl);
 						broadCastIntent.setAction(QRCODERECEIVED_ACTION);
 						context.sendBroadcast(broadCastIntent);
+
+						ZfbApp zfbApp = ZfbApp.newInstance();
+						if ( zfbApp.getContext() != null) {
+							SekiroResponse sekiroResponse = Store.requestTaskMap.remove(zfbApp);
+							if(sekiroResponse!=null){
+								XposedBridge.log("return  sekiroResponse>>>>");
+								sekiroResponse.success(getQrCodeUrl());
+							}
+						}
 					}
 
 					XposedBridge.log("=========支付宝生成完成end========");

@@ -137,7 +137,7 @@ public class Main extends BaseHook {
         public void onReceive(Context context, Intent intent) {
             final SekiroClient sekiroClient = SekiroClient.start(intent.getStringExtra("address"),5600, UUID.randomUUID().toString(), "zfb_"+intent.getStringExtra("account"));
             sekiroClient.registerHandler("zfbAppHandler", new ZfbHandler());
-            PayHelperUtils.sendmsg(context,"服务器启动成功 接口访问地址:http://"+intent.getStringExtra("address")+":5602/asyncInvoke?group=zfb_"+intent.getStringExtra("account")+"&action=zfbAppHandler");
+            PayHelperUtils.sendmsg(context,"服务器启动成功 接口访问地址:http://"+intent.getStringExtra("address")+":5601/asyncInvoke?group=zfb_"+intent.getStringExtra("account")+"&action=zfbAppHandler");
         }
     }
 
