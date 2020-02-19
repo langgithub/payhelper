@@ -73,20 +73,29 @@ public class AlipayHook {
 					Matcher matcher = compile.matcher(result);
 					if (matcher.find()) {
 						setQrCodeUrl(matcher.group(1));
-					}
-					if (obj[0]!=null){
-						XposedBridge.log("close PayeeQRActivity");
-						Method onBackPressed = XposedHelpers.findMethodBestMatch(XposedHelpers.findClass("com.alipay.mobile.payee.ui.PayeeQRActivity", classLoader), "onBackPressed");
-						onBackPressed.invoke(obj[0]);
-						Method finish = XposedHelpers.findMethodBestMatch(XposedHelpers.findClass("com.alipay.mobile.payee.ui.PayeeQRActivity", classLoader), "finish");
-						finish.invoke(obj[0]);
+						if (obj[0]!=null){
+							XposedBridge.log("close PayeeQRActivity");
+							Method onBackPressed = XposedHelpers.findMethodBestMatch(XposedHelpers.findClass("com.alipay.mobile.payee.ui.PayeeQRActivity", classLoader), "onBackPressed");
+							onBackPressed.invoke(obj[0]);
+							Method finish = XposedHelpers.findMethodBestMatch(XposedHelpers.findClass("com.alipay.mobile.payee.ui.PayeeQRActivity", classLoader), "finish");
+							finish.invoke(obj[0]);
 
+							ZfbApp zfbApp = ZfbApp.newInstance();
+							if ( zfbApp.getContext() != null) {
+								SekiroResponse sekiroResponse = Store.requestTaskMap.remove(zfbApp);
+								if(sekiroResponse!=null){
+									XposedBridge.log("return  sekiroResponse>>>>");
+									sekiroResponse.success(getQrCodeUrl());
+								}
+							}
+						}
+					}else {
 						ZfbApp zfbApp = ZfbApp.newInstance();
 						if ( zfbApp.getContext() != null) {
 							SekiroResponse sekiroResponse = Store.requestTaskMap.remove(zfbApp);
 							if(sekiroResponse!=null){
 								XposedBridge.log("return  sekiroResponse>>>>");
-								sekiroResponse.success(getQrCodeUrl());
+								sekiroResponse.success("url 为空");
 							}
 						}
 					}
