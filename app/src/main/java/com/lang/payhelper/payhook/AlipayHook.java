@@ -73,6 +73,13 @@ public class AlipayHook {
 					Matcher matcher = compile.matcher(result);
 					if (matcher.find()) {
 						setQrCodeUrl(matcher.group(1));
+						Intent broadCastIntent = new Intent();
+						broadCastIntent.putExtra("money", "没有设置");
+						broadCastIntent.putExtra("mark", "没有设置");
+						broadCastIntent.putExtra("type", "alipay");
+						broadCastIntent.putExtra("payurl", getQrCodeUrl());
+						broadCastIntent.setAction(QRCODERECEIVED_ACTION);
+
 						if (obj[0]!=null){
 							XposedBridge.log("close PayeeQRActivity");
 							Method onBackPressed = XposedHelpers.findMethodBestMatch(XposedHelpers.findClass("com.alipay.mobile.payee.ui.PayeeQRActivity", classLoader), "onBackPressed");
