@@ -14,6 +14,7 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.lang.payhelper.utils.AbSharedUtil;
+import com.lang.payhelper.utils.PayHelperUtils;
 
 /**
  * 
@@ -30,7 +31,7 @@ import com.lang.payhelper.utils.AbSharedUtil;
  */
 public class SettingActivity extends Activity implements OnClickListener{
 	
-	private EditText tv_notify_sms,tv_notify_zfb,address,et_wxid;
+	private EditText tv_notify_sms,tv_notify_zfb,address,et_phone;
 	private Button bt_save,bt_back;
 	private RelativeLayout rl_back;
 	
@@ -42,7 +43,7 @@ public class SettingActivity extends Activity implements OnClickListener{
 		tv_notify_sms=(EditText) findViewById(R.id.notify_sms);
 		tv_notify_zfb=(EditText) findViewById(R.id.notify_zfb);
 		address=(EditText) findViewById(R.id.address);
-		et_wxid=(EditText) findViewById(R.id.et_wxid);
+		et_phone=(EditText) findViewById(R.id.phone);
 		if(!TextUtils.isEmpty(AbSharedUtil.getString(getApplicationContext(), "notify_sms"))){
 			tv_notify_sms.setText(AbSharedUtil.getString(getApplicationContext(), "notify_sms"));
 		}
@@ -53,7 +54,7 @@ public class SettingActivity extends Activity implements OnClickListener{
 			address.setText(AbSharedUtil.getString(getApplicationContext(), "address"));
 		}
 		if(!TextUtils.isEmpty(AbSharedUtil.getString(getApplicationContext(), "account"))){
-			et_wxid.setText(AbSharedUtil.getString(getApplicationContext(), "account"));
+			et_phone.setText(AbSharedUtil.getString(getApplicationContext(), "account"));
 		}
 		
 		bt_save=(Button) findViewById(R.id.save);
@@ -100,15 +101,18 @@ public class SettingActivity extends Activity implements OnClickListener{
 //			}else{
 				AbSharedUtil.putString(getApplicationContext(), "address", _address);
 //			}
-			String wxid=et_wxid.getText().toString();
-			if(!TextUtils.isEmpty(wxid)){
-				AbSharedUtil.putString(getApplicationContext(), "account", wxid);
+			String account=et_phone.getText().toString();
+			if(!TextUtils.isEmpty(account)){
+				AbSharedUtil.putString(getApplicationContext(), "account", account);
+			}else {
+				PayHelperUtils.sendmsg(getApplicationContext(),"支付宝账号为空");
+				return;
 			}
 			Toast.makeText(getApplicationContext(), "保存成功", Toast.LENGTH_LONG).show();
-
 			Intent broadCastIntent = new Intent();
 			broadCastIntent.setAction("com.payhelper.tcp.start");
 			broadCastIntent.putExtra("address",_address);
+			broadCastIntent.putExtra("account",account);
 			sendBroadcast(broadCastIntent);
 
 			finish();

@@ -124,24 +124,46 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:orientation="horizontal"
-                android:visibility="gone" >
+                android:orientation="horizontal" >
 
                 <TextView
                     android:layout_width="0dip"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
-                    android:text="账号标识" />
+                    android:text="支付宝账号" />
 
                 <EditText
-                    android:id="@+id/et_wxid"
+                    android:id="@+id/phone"
                     android:layout_width="0dip"
                     android:layout_height="wrap_content"
                     android:layout_weight="5"
                     android:ellipsize="end"
-                    android:hint="可空，用于服务端识别哪个账号收到的付款"
-                    android:singleLine="true" />
+                    android:singleLine="true"
+                    android:text=""/>
             </LinearLayout>
+
+<!--            <LinearLayout-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:gravity="center"-->
+<!--                android:orientation="horizontal"-->
+<!--                android:visibility="gone" >-->
+
+<!--                <TextView-->
+<!--                    android:layout_width="0dip"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_weight="2"-->
+<!--                    android:text="账号标识" />-->
+
+<!--                <EditText-->
+<!--                    android:id="@+id/et_wxid"-->
+<!--                    android:layout_width="0dip"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_weight="5"-->
+<!--                    android:ellipsize="end"-->
+<!--                    android:hint="可空，用于服务端识别哪个账号收到的付款"-->
+<!--                    android:singleLine="true" />-->
+<!--            </LinearLayout>-->
 
             <LinearLayout
                 android:layout_width="match_parent"
