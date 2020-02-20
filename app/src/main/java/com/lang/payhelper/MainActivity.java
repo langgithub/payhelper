@@ -151,7 +151,7 @@ public class MainActivity extends Activity{
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Date dt = null;
         try {
-            dt = sdf.parse("2020-02-19");
+            dt = sdf.parse("2020-02-20");
             long time = new Date().getTime();
             if (time-dt.getTime()>(1000*3600*24)){
                 return false;

@@ -10,7 +10,7 @@ import com.lang.sekiro.api.SekiroResponse;
 
 import de.robv.android.xposed.XposedHelpers;
 
-public class ZfbHandler implements SekiroRequestHandler {
+public class ZfbQr2Handler implements SekiroRequestHandler {
 
     @Override
     public void handleRequest(SekiroRequest sekiroRequest, SekiroResponse sekiroResponse) {
@@ -27,11 +27,6 @@ public class ZfbHandler implements SekiroRequestHandler {
             Log.i("Xposed","handleRequest start");
             Intent intent2=new Intent(zfbApp.getContext(), XposedHelpers.findClass("com.alipay.mobile.payee.ui.PayeeQRActivity", zfbApp.getContext().getClassLoader()));
             zfbApp.getContext().startActivity(intent2);
-//            Intent intent2=new Intent(zfbApp.getContext(), XposedHelpers.findClass("com.alipay.mobile.payee.ui.PayeeQRSetMoneyActivity", zfbApp.getContext().getClassLoader()));
-//            intent2.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//            intent2.putExtra("mark", bz);
-//            intent2.putExtra("money", je);
-//            zfbApp.getContext().startActivity(intent2);
         }else {
             sekiroResponse = Store.requestTaskMap.remove(zfbApp);
             if(sekiroResponse!=null){
