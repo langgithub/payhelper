@@ -13,8 +13,10 @@ import java.util.regex.Pattern;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.lang.payhelper.CustomApplcation;
 import com.lang.payhelper.handler.Store;
 import com.lang.payhelper.handler.ZfbApp;
+import com.lang.payhelper.utils.DBManager;
 import com.lang.payhelper.utils.LogToFile;
 import com.lang.payhelper.utils.PayHelperUtils;
 import com.lang.payhelper.utils.StringUtils;
@@ -144,6 +146,13 @@ public class AlipayHook {
 								time=jsonArray.getJSONObject(3).getString("content");
 							}
 							String userId=StringUtils.getTextCenter(MessageInfo,"userId='","'");
+							DBManager dbManager = new DBManager(context.getApplicationContext());
+
+							String _mark = dbManager.getMark(money);
+							XposedBridge.log("======获取自付宝备注"+_mark+"(money="+money+")=========");
+							if(!"null".equals(_mark)){
+								mark=_mark;
+							}
 
                 			Intent broadCastIntent = new Intent();
                 			broadCastIntent.putExtra("bill_no", tradeNo);

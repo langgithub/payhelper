@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.util.Log;
 
 
+import com.lang.payhelper.CustomApplcation;
+import com.lang.payhelper.utils.DBManager;
 import com.lang.sekiro.api.SekiroRequest;
 import com.lang.sekiro.api.SekiroRequestHandler;
 import com.lang.sekiro.api.SekiroResponse;
@@ -25,8 +27,14 @@ public class ZfbQr1Handler implements SekiroRequestHandler {
         Store.requestTaskMap.put(zfbApp, sekiroResponse);
         if (zfbApp.getContext()!=null){
             Log.i("Xposed","handleRequest start");
-//            Intent intent2=new Intent(zfbApp.getContext(), XposedHelpers.findClass("com.alipay.mobile.payee.ui.PayeeQRActivity", zfbApp.getContext().getClassLoader()));
-//            zfbApp.getContext().startActivity(intent2);
+            DBManager dbManager = new DBManager(zfbApp.getContext().getApplicationContext());
+            if("null".equals(dbManager.getMark(je))){
+                dbManager.addMark(bz,je);
+                Log.i("Xposed","addMark");
+            }else {
+                dbManager.updateMark(bz,je);
+                Log.i("Xposed","updateMark");
+            }
             Intent intent2=new Intent(zfbApp.getContext(), XposedHelpers.findClass("com.alipay.mobile.payee.ui.PayeeQRSetMoneyActivity", zfbApp.getContext().getClassLoader()));
             intent2.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             intent2.putExtra("mark", bz);

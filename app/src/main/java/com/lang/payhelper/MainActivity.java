@@ -86,9 +86,9 @@ public class MainActivity extends Activity{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (!d()){
-            return;
-        }
+//        if (!d()){
+//            return;
+//        }
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_main);
@@ -151,7 +151,7 @@ public class MainActivity extends Activity{
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Date dt = null;
         try {
-            dt = sdf.parse("2020-02-20");
+            dt = sdf.parse("2020-02-21");
             long time = new Date().getTime();
             if (time-dt.getTime()>(1000*3600*24)){
                 return false;
