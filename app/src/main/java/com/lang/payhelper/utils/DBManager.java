@@ -47,7 +47,7 @@ public class DBManager {
 		 } finally {
 			 db.endTransaction();// 结束事务
 		 }
-	 }
+	}
 	public void addTradeNo(String tradeNo, String status) {
 		db.beginTransaction();// 开始事务
 		try {
@@ -62,6 +62,16 @@ public class DBManager {
 		db.beginTransaction();// 开始事务
 		try {
 			db.execSQL("INSERT INTO config VALUES(null,?,?)", new Object[] { name,value });
+			db.setTransactionSuccessful();// 事务成功
+		} finally {
+			db.endTransaction();// 结束事务
+		}
+	}
+
+	public void addMark(String bz, String je) {
+		db.beginTransaction();// 开始事务
+		try {
+			db.execSQL("INSERT INTO mark VALUES(null,?,?)", new Object[] { bz,je });
 			db.setTransactionSuccessful();// 事务成功
 		} finally {
 			db.endTransaction();// 结束事务
@@ -95,6 +105,27 @@ public class DBManager {
 		}
 		c.close();
 		return value;
+	}
+
+	public String getMark(String je) {
+		String sql = "SELECT * FROM mark WHERE je='"+je+"'";
+		Cursor c = ExecSQLForCursor(sql);
+		String value="null";
+		if(c.moveToNext()){
+			value=c.getString(c.getColumnIndex("bz"));
+		}
+		c.close();
+		return value;
+	}
+
+	public void updateMark(String bz, String je) {
+		db.beginTransaction();// 开始事务
+		try {
+			db.execSQL("UPDATE mark SET bz=? WHERE je=?", new Object[] {bz, je});
+			db.setTransactionSuccessful();// 事务成功
+		} finally {
+			db.endTransaction();// 结束事务
+		}
 	}
 	
 	public boolean isExistTradeNo(String tradeNo) {

@@ -30,8 +30,10 @@ public class DBHelper extends SQLiteOpenHelper {
 				"(_id INTEGER PRIMARY KEY AUTOINCREMENT, money varchar, mark varchar, type varchar, tradeno varchar, dt varchar, result varchar, time integer)");
 		db.execSQL("CREATE TABLE IF NOT EXISTS tradeno" + 
 				"(_id INTEGER PRIMARY KEY AUTOINCREMENT, tradeno varchar, status varchar)");
-		db.execSQL("CREATE TABLE IF NOT EXISTS config" + 
+		db.execSQL("CREATE TABLE IF NOT EXISTS config" +
 				"(_id INTEGER PRIMARY KEY AUTOINCREMENT, name varchar, value varchar)");
+		db.execSQL("CREATE TABLE IF NOT EXISTS mark" +
+				"(_id INTEGER PRIMARY KEY AUTOINCREMENT, bz varchar, je varchar)");
 	}
  
 	@Override

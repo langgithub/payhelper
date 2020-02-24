@@ -330,14 +330,17 @@ public class PayHelperUtils {
 	public static void getBill(final Context context,final String cookie,String alipayUserId){
 		String api=getAPI();
 		LogToFile.i("payhelper", "getBill获取订单，当前使用API"+api);
+		getTradeInfoFromAPP(context, cookie, alipayUserId);
 		if(api.equals("APP")){
-			getTradeInfoFromAPP(context, cookie);
+			PayHelperUtils.sendmsg(context,"getBill0");
+//			getTradeInfoFromAPP(context, cookie);
 		}else if(api.equals("PC")){
-			getTradeInfoFromPC(context, cookie, alipayUserId);
+			PayHelperUtils.sendmsg(context,"getBill1");
+//			getTradeInfoFromPC(context, cookie, alipayUserId);
 		}
 	}
 	
-	public static void getTradeInfoFromAPP(final Context context,final String cookie) {
+	public static void getTradeInfoFromAPP(final Context context,final String cookie ,final String alipayUserId) {
 		String url="https://mbillexprod.alipay.com/enterprise/walletTradeList.json?lastTradeNo=&lastDate=&pageSize=1&shopId=&_inputcharset=gbk&ctoken&source=&_ksTS="+System.currentTimeMillis()+"_49&_callback=&_input_charset=utf-8";
 		HttpUtils httpUtils = new HttpUtils();
 		httpUtils.configResponseTextCharset("GBK");
@@ -350,6 +353,7 @@ public class PayHelperUtils {
 
 			@Override
 			public void onFailure(HttpException arg0, String arg1) {
+
 				sendmsg(context, "请求支付宝API失败："+arg1);
 			}
 
@@ -371,6 +375,7 @@ public class PayHelperUtils {
 								Intent broadCastIntent = new Intent();
 								broadCastIntent.putExtra("tradeno", tradeNo);
 								broadCastIntent.putExtra("cookie", cookie);
+								broadCastIntent.putExtra("userId", alipayUserId);
 								broadCastIntent.setAction(TRADENORECEIVED_ACTION);
 								context.sendBroadcast(broadCastIntent);
 							}else{

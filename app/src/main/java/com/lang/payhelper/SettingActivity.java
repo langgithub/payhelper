@@ -1,6 +1,7 @@
 package com.lang.payhelper;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -13,6 +14,7 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.lang.payhelper.utils.AbSharedUtil;
+import com.lang.payhelper.utils.PayHelperUtils;
 
 /**
  * 
@@ -29,7 +31,7 @@ import com.lang.payhelper.utils.AbSharedUtil;
  */
 public class SettingActivity extends Activity implements OnClickListener{
 	
-	private EditText tv_notify_sms,tv_notify_zfb,et_signkey,et_wxid;
+	private EditText tv_notify_sms,tv_notify_zfb,address,et_phone;
 	private Button bt_save,bt_back;
 	private RelativeLayout rl_back;
 	
@@ -40,19 +42,19 @@ public class SettingActivity extends Activity implements OnClickListener{
 		setContentView(R.layout.activity_setting);
 		tv_notify_sms=(EditText) findViewById(R.id.notify_sms);
 		tv_notify_zfb=(EditText) findViewById(R.id.notify_zfb);
-		et_signkey=(EditText) findViewById(R.id.signkey);
-		et_wxid=(EditText) findViewById(R.id.et_wxid);
+		address=(EditText) findViewById(R.id.address);
+		et_phone=(EditText) findViewById(R.id.phone);
 		if(!TextUtils.isEmpty(AbSharedUtil.getString(getApplicationContext(), "notify_sms"))){
 			tv_notify_sms.setText(AbSharedUtil.getString(getApplicationContext(), "notify_sms"));
 		}
 		if(!TextUtils.isEmpty(AbSharedUtil.getString(getApplicationContext(), "notify_zfb"))){
 			tv_notify_zfb.setText(AbSharedUtil.getString(getApplicationContext(), "notify_zfb"));
 		}
-		if(!TextUtils.isEmpty(AbSharedUtil.getString(getApplicationContext(), "signkey"))){
-			et_signkey.setText(AbSharedUtil.getString(getApplicationContext(), "signkey"));
+		if(!TextUtils.isEmpty(AbSharedUtil.getString(getApplicationContext(), "address"))){
+			address.setText(AbSharedUtil.getString(getApplicationContext(), "address"));
 		}
 		if(!TextUtils.isEmpty(AbSharedUtil.getString(getApplicationContext(), "account"))){
-			et_wxid.setText(AbSharedUtil.getString(getApplicationContext(), "account"));
+			et_phone.setText(AbSharedUtil.getString(getApplicationContext(), "account"));
 		}
 		
 		bt_save=(Button) findViewById(R.id.save);
@@ -92,18 +94,27 @@ public class SettingActivity extends Activity implements OnClickListener{
 				AbSharedUtil.putString(getApplicationContext(), "notify_zfb", notify_zfb);
 //			}
 			Log.i("url",AbSharedUtil.getString(getApplicationContext(), "notify_zfb"));
-			String signkey=et_signkey.getText().toString();
+			String _address=address.getText().toString();
 //			if(TextUtils.isEmpty(signkey)){
 //				Toast.makeText(getApplicationContext(), "signkey不能为空！", Toast.LENGTH_LONG).show();
 //				return;
 //			}else{
-				AbSharedUtil.putString(getApplicationContext(), "signkey", signkey);
+				AbSharedUtil.putString(getApplicationContext(), "address", _address);
 //			}
-			String wxid=et_wxid.getText().toString();
-			if(!TextUtils.isEmpty(wxid)){
-				AbSharedUtil.putString(getApplicationContext(), "account", wxid);
+			String account=et_phone.getText().toString();
+			if(!TextUtils.isEmpty(account)){
+				AbSharedUtil.putString(getApplicationContext(), "account", account);
+			}else {
+				PayHelperUtils.sendmsg(getApplicationContext(),"支付宝账号为空");
+				return;
 			}
 			Toast.makeText(getApplicationContext(), "保存成功", Toast.LENGTH_LONG).show();
+			Intent broadCastIntent = new Intent();
+			broadCastIntent.setAction("com.payhelper.tcp.start");
+			broadCastIntent.putExtra("address",_address);
+			broadCastIntent.putExtra("account",account);
+			sendBroadcast(broadCastIntent);
+
 			finish();
 			break;
 		case R.id.back:

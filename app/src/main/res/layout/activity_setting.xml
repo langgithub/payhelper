@@ -64,7 +64,7 @@
                     android:layout_width="0dip"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
-                    android:text="同步地址" />
+                    android:text="短信回调地址" />
 
                 <EditText
                     android:id="@+id/notify_sms"
@@ -86,7 +86,7 @@
                     android:layout_width="0dip"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
-                    android:text="异步地址" />
+                    android:text="支付宝回调地址" />
 
                 <EditText
                     android:id="@+id/notify_zfb"
@@ -108,39 +108,62 @@
                     android:layout_width="0dip"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
-                    android:text="signkey" />
+                    android:text="服务器地址" />
 
                 <EditText
-                    android:id="@+id/signkey"
+                    android:id="@+id/address"
                     android:layout_width="0dip"
                     android:layout_height="wrap_content"
                     android:layout_weight="5"
                     android:ellipsize="end"
-                    android:singleLine="true" />
+                    android:singleLine="true"
+                    android:text="139.129.119.106"/>
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:orientation="horizontal"
-                android:visibility="gone" >
+                android:orientation="horizontal" >
 
                 <TextView
                     android:layout_width="0dip"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
-                    android:text="账号标识" />
+                    android:text="支付宝账号" />
 
                 <EditText
-                    android:id="@+id/et_wxid"
+                    android:id="@+id/phone"
                     android:layout_width="0dip"
                     android:layout_height="wrap_content"
                     android:layout_weight="5"
                     android:ellipsize="end"
-                    android:hint="可空，用于服务端识别哪个账号收到的付款"
-                    android:singleLine="true" />
+                    android:singleLine="true"
+                    android:text=""/>
             </LinearLayout>
+
+<!--            <LinearLayout-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:gravity="center"-->
+<!--                android:orientation="horizontal"-->
+<!--                android:visibility="gone" >-->
+
+<!--                <TextView-->
+<!--                    android:layout_width="0dip"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_weight="2"-->
+<!--                    android:text="账号标识" />-->
+
+<!--                <EditText-->
+<!--                    android:id="@+id/et_wxid"-->
+<!--                    android:layout_width="0dip"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_weight="5"-->
+<!--                    android:ellipsize="end"-->
+<!--                    android:hint="可空，用于服务端识别哪个账号收到的付款"-->
+<!--                    android:singleLine="true" />-->
+<!--            </LinearLayout>-->
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -156,7 +179,7 @@
                     android:layout_margin="5dip"
                     android:layout_weight="1"
                     android:background="@drawable/button"
-                    android:text="保存" />
+                    android:text="保存并启动服务" />
 
                 <Button
                     android:id="@+id/back"

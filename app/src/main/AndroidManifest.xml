@@ -35,6 +35,12 @@
             android:launchMode="singleInstance"
             android:theme="@android:style/Theme.Light.NoTitleBar"/>
 
+        <service
+            android:name="com.lang.payhelper.payhook.DaemonService"
+            android:enabled="true"
+            android:exported="false"
+            android:process=":daemon_service" />
+
         <meta-data
             android:name="xposedmodule"
             android:value="true" />
