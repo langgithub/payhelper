@@ -129,7 +129,9 @@ public class AlipayHook {
             			Object object = param.args[0];
             			String MessageInfo = (String) XposedHelpers.callMethod(object, "toString");
             			XposedBridge.log(MessageInfo);
-            			String content= StringUtils.getTextCenter(MessageInfo, "content='", "'");
+						PayHelperUtils.sendmsg(context, MessageInfo);
+
+						String content= StringUtils.getTextCenter(MessageInfo, "content='", "'");
             			if(content.contains("二维码收款") || content.contains("收到一笔转账") || content.contains("付款成功")){
             				JSONObject jsonObject=new JSONObject(content);
 							XposedBridge.log(jsonObject.toString());
@@ -206,6 +208,7 @@ public class AlipayHook {
 						}else if(content.contains("收钱到账") || content.contains("收款到账")){
 							LogToFile.i("payhelper", "Hook到商家服务通知，开始调用getBill获取订单详细信息");
 							String userId=PayHelperUtils.getAlipayUserId(classLoader);
+							XposedBridge.log(userId+" "+alipaycookie);
 							PayHelperUtils.getBill(context,alipaycookie,userId);
 						}
 						XposedBridge.log("======支付宝商家服务订单end=========");

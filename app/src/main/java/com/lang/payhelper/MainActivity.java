@@ -48,6 +48,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import androidx.core.app.ActivityCompat;
+import de.robv.android.xposed.XposedBridge;
 
 /**
  * @author SuXiaoliang
@@ -386,6 +387,7 @@ public class MainActivity extends Activity{
                     //商家服务
                     final String tradeno = intent.getStringExtra("tradeno");
                     String cookie = intent.getStringExtra("cookie");
+                    String userId = intent.getStringExtra("userId");
                     final DBManager dbManager = new DBManager(CustomApplcation.getInstance().getApplicationContext());
                     if (!dbManager.isExistTradeNo(tradeno)) {
                         dbManager.addTradeNo(tradeno, "0");
@@ -415,8 +417,12 @@ public class MainActivity extends Activity{
                                             String mark = elements.get(3).ownText();
                                             String dt = System.currentTimeMillis() + "";
                                             dbManager.addOrder(new OrderBean(money, mark, "alipay", tradeno, dt, "", 0));
-                                            sendmsg("收到支付宝订单,订单号：" + tradeno + "金额：" + money + "备注：" + mark);
-                                            notifyapi("alipay", tradeno, money, mark, dt,"","","");
+                                            String _mark = dbManager.getMark(money);
+                                            if(!"null".equals(_mark)){
+                                                mark=_mark;
+                                            }
+                                            sendmsg("收到[支付宝]订单,订单号：[" + tradeno + "]金额：[" + money + "]备注：[" + mark +"]payurl: [] userid:["+userId+"] bill_account: [] bill_time["+dt+"]");
+                                            notifyapi("alipay", tradeno, money, mark, dt,"","",userId);
                                         }
                                     } catch (Exception e) {
                                         PayHelperUtils.sendmsg(context, "TRADENORECEIVED_ACTION-->>onSuccess异常" + e.getMessage());
