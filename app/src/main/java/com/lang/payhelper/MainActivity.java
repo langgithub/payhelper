@@ -536,13 +536,12 @@ public class MainActivity extends Activity{
                 params.addBodyParameter("mark", mark);
                 params.addBodyParameter("dt", bill_time);
                 params.addBodyParameter("payurl", payUrl);
-//                params.addBodyParameter("account", bill_account);
                 params.addBodyParameter("userId", bill_userId);
 
 
-                if (!TextUtils.isEmpty(bill_account)) {
-                    params.addBodyParameter("account", bill_account);
-                }
+//                if (!TextUtils.isEmpty(bill_account)) {
+//                    params.addBodyParameter("account", bill_account);
+//                }
                 params.addBodyParameter("sign", sign);
                 httpUtils.send(HttpMethod.POST, notifyurl, params, new RequestCallBack<String>() {
 
