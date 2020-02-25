@@ -129,8 +129,6 @@ public class AlipayHook {
             			Object object = param.args[0];
             			String MessageInfo = (String) XposedHelpers.callMethod(object, "toString");
             			XposedBridge.log(MessageInfo);
-						PayHelperUtils.sendmsg(context, MessageInfo);
-
 						String content= StringUtils.getTextCenter(MessageInfo, "content='", "'");
             			if(content.contains("二维码收款") || content.contains("收到一笔转账") || content.contains("付款成功")){
             				JSONObject jsonObject=new JSONObject(content);
@@ -192,6 +190,7 @@ public class AlipayHook {
 						Object object = param.args[0];
 						String MessageInfo = (String) XposedHelpers.callMethod(object, "toString");
 						String content=StringUtils.getTextCenter(MessageInfo, "extraInfo='", "'").replace("\\", "");
+						String _money=StringUtils.getTextCenter(MessageInfo, "mainAmount\":\"", "\"");
 						XposedBridge.log(content);
 						if(content.contains("店员通")){
 							String money=StringUtils.getTextCenter(content, "mainAmount\":\"", "\",\"mainTitle");
@@ -209,7 +208,10 @@ public class AlipayHook {
 							LogToFile.i("payhelper", "Hook到商家服务通知，开始调用getBill获取订单详细信息");
 							String userId=PayHelperUtils.getAlipayUserId(classLoader);
 							XposedBridge.log(userId+" "+alipaycookie);
-							PayHelperUtils.getBill(context,alipaycookie,userId);
+							DBManager dbManager = new DBManager(context.getApplicationContext());
+							String _mark = dbManager.getMark(_money);
+							XposedBridge.log("======获取自付宝备注"+_mark+"(money="+_money+")=========");
+							PayHelperUtils.getBill(context,alipaycookie,userId,_mark);
 						}
 						XposedBridge.log("======支付宝商家服务订单end=========");
 					} catch (Exception e) {

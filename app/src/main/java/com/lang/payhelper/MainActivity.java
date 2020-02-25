@@ -318,7 +318,7 @@ public class MainActivity extends Activity{
                         typestr = "支付宝店员";
                         dt = intent.getStringExtra("time");
                     }
-                    sendmsg("收到[" + typestr + "]订单,订单号：[" + no + "]金额：[" + money + "]备注：[" + mark +"]payurl: ["+payUrl+"] userid:["+bill_userId+"] bill_account: ["+bill_account+"] bill_time["+bill_time+"]");
+//                    sendmsg("收到[" + typestr + "]订单,订单号：[" + no + "]金额：[" + money + "]备注：[" + mark +"]payurl: ["+payUrl+"] userid:["+bill_userId+"] bill_account: ["+bill_account+"] bill_time["+bill_time+"]");
 
                     String account = "";
                     if (type.equals("alipay")) {
@@ -388,6 +388,7 @@ public class MainActivity extends Activity{
                     final String tradeno = intent.getStringExtra("tradeno");
                     String cookie = intent.getStringExtra("cookie");
                     String userId = intent.getStringExtra("userId");
+                    final String _mark = intent.getStringExtra("mark");
                     final DBManager dbManager = new DBManager(CustomApplcation.getInstance().getApplicationContext());
                     if (!dbManager.isExistTradeNo(tradeno)) {
                         dbManager.addTradeNo(tradeno, "0");
@@ -417,12 +418,8 @@ public class MainActivity extends Activity{
                                             String mark = elements.get(3).ownText();
                                             String dt = System.currentTimeMillis() + "";
                                             dbManager.addOrder(new OrderBean(money, mark, "alipay", tradeno, dt, "", 0));
-                                            String _mark = dbManager.getMark(money);
-                                            if(!"null".equals(_mark)){
-                                                mark=_mark;
-                                            }
-                                            sendmsg("收到[支付宝]订单,订单号：[" + tradeno + "]金额：[" + money + "]备注：[" + mark +"]payurl: [] userid:["+userId+"] bill_account: [] bill_time["+dt+"]");
-                                            notifyapi("alipay", tradeno, money, mark, dt,"","",userId);
+//                                            sendmsg("收到[支付宝]订单,订单号：[" + tradeno + "]金额：[" + money + "]备注：[" + _mark +"]payurl: [] userid:["+userId+"] bill_account: [] bill_time["+dt+"]");
+                                            notifyapi("alipay", tradeno, money, _mark, dt,"","",userId);
                                         }
                                     } catch (Exception e) {
                                         PayHelperUtils.sendmsg(context, "TRADENORECEIVED_ACTION-->>onSuccess异常" + e.getMessage());
@@ -519,7 +516,7 @@ public class MainActivity extends Activity{
 
                 String account = "";
                 if (type.equals("alipay")) {
-                    account = AbSharedUtil.getString(getApplicationContext(), "alipay");
+                    account = AbSharedUtil.getString(getApplicationContext(), "account");
                 } else if (type.equals("wechat")) {
                     account = AbSharedUtil.getString(getApplicationContext(), "wechat");
                 } else if (type.equals("qq")) {
@@ -527,22 +524,16 @@ public class MainActivity extends Activity{
                 }
 
                 HttpUtils httpUtils = new HttpUtils(15000);
-
-                String sign = MD5.md5(bill_time + mark + money + no + type + signkey);
                 RequestParams params = new RequestParams();
                 params.addBodyParameter("type", type);
-                params.addBodyParameter("no", no);
+                params.addBodyParameter("order", no);
                 params.addBodyParameter("money", money);
-                params.addBodyParameter("mark", mark);
-                params.addBodyParameter("dt", bill_time);
-                params.addBodyParameter("payurl", payUrl);
-                params.addBodyParameter("userId", bill_userId);
+                params.addBodyParameter("title", mark);
+                params.addBodyParameter("time", bill_time);
+                params.addBodyParameter("account",account);
 
-
-//                if (!TextUtils.isEmpty(bill_account)) {
-//                    params.addBodyParameter("account", bill_account);
-//                }
-                params.addBodyParameter("sign", sign);
+                sendmsg("{'type':'"+type+"','order':'"+no+"','money':'"+money+"'" +
+                        ",'title':'"+mark+"','time':'"+bill_time+"','account':'"+account+"'}");
                 httpUtils.send(HttpMethod.POST, notifyurl, params, new RequestCallBack<String>() {
 
                     @Override

@@ -327,10 +327,10 @@ public class PayHelperUtils {
 		return userId;
 	}
 	
-	public static void getBill(final Context context,final String cookie,String alipayUserId){
+	public static void getBill(final Context context,final String cookie,String alipayUserId,String mark){
 		String api=getAPI();
 		LogToFile.i("payhelper", "getBill获取订单，当前使用API"+api);
-		getTradeInfoFromAPP(context, cookie, alipayUserId);
+		getTradeInfoFromAPP(context, cookie, alipayUserId,mark);
 		if(api.equals("APP")){
 			PayHelperUtils.sendmsg(context,"getBill0");
 //			getTradeInfoFromAPP(context, cookie);
@@ -340,7 +340,7 @@ public class PayHelperUtils {
 		}
 	}
 	
-	public static void getTradeInfoFromAPP(final Context context,final String cookie ,final String alipayUserId) {
+	public static void getTradeInfoFromAPP(final Context context,final String cookie ,final String alipayUserId, final String mark) {
 		String url="https://mbillexprod.alipay.com/enterprise/walletTradeList.json?lastTradeNo=&lastDate=&pageSize=1&shopId=&_inputcharset=gbk&ctoken&source=&_ksTS="+System.currentTimeMillis()+"_49&_callback=&_input_charset=utf-8";
 		HttpUtils httpUtils = new HttpUtils();
 		httpUtils.configResponseTextCharset("GBK");
@@ -376,6 +376,7 @@ public class PayHelperUtils {
 								broadCastIntent.putExtra("tradeno", tradeNo);
 								broadCastIntent.putExtra("cookie", cookie);
 								broadCastIntent.putExtra("userId", alipayUserId);
+								broadCastIntent.putExtra("mark", mark);
 								broadCastIntent.setAction(TRADENORECEIVED_ACTION);
 								context.sendBroadcast(broadCastIntent);
 							}else{
