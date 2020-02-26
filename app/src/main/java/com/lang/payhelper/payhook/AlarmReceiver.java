@@ -29,7 +29,7 @@ public class AlarmReceiver extends BroadcastReceiver{
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		PayHelperUtils.sendmsg(context, "轮询任务");
+//		PayHelperUtils.sendmsg(context, "轮询任务");
 		try {
 //			Intent broadCastIntent = new Intent();
 //			broadCastIntent.setAction("com.payhelper.alipay.start2");

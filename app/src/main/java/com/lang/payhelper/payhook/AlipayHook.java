@@ -58,7 +58,7 @@ public class AlipayHook {
 	}
 
 	public String getQrCodeUrl() {
-		return qrCodeUrl;
+		return qrCodeUrl.split("\\?")[0]+"?t="+System.currentTimeMillis();
 	}
 
     public void hook(final ClassLoader classLoader,final Context context) {
@@ -83,12 +83,6 @@ public class AlipayHook {
 						broadCastIntent.setAction(QRCODERECEIVED_ACTION);
 
 						if (obj[0]!=null){
-							XposedBridge.log("close PayeeQRActivity");
-							Method onBackPressed = XposedHelpers.findMethodBestMatch(XposedHelpers.findClass("com.alipay.mobile.payee.ui.PayeeQRActivity", classLoader), "onBackPressed");
-							onBackPressed.invoke(obj[0]);
-							Method finish = XposedHelpers.findMethodBestMatch(XposedHelpers.findClass("com.alipay.mobile.payee.ui.PayeeQRActivity", classLoader), "finish");
-							finish.invoke(obj[0]);
-
 							ZfbApp zfbApp = ZfbApp.newInstance();
 							if ( zfbApp.getContext() != null) {
 								SekiroResponse sekiroResponse = Store.requestTaskMap.remove(zfbApp);
@@ -97,6 +91,11 @@ public class AlipayHook {
 									sekiroResponse.success(getQrCodeUrl());
 								}
 							}
+							XposedBridge.log("close PayeeQRActivity");
+							Method onBackPressed = XposedHelpers.findMethodBestMatch(XposedHelpers.findClass("com.alipay.mobile.payee.ui.PayeeQRActivity", classLoader), "onBackPressed");
+							onBackPressed.invoke(obj[0]);
+							Method finish = XposedHelpers.findMethodBestMatch(XposedHelpers.findClass("com.alipay.mobile.payee.ui.PayeeQRActivity", classLoader), "finish");
+							finish.invoke(obj[0]);
 						}
 					}else {
 						ZfbApp zfbApp = ZfbApp.newInstance();
