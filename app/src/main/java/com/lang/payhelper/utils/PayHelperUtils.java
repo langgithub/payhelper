@@ -181,61 +181,114 @@ public class PayHelperUtils {
 		}
 	}
 
-	public static void notify(final Context context, String type, final String no, String money, String mark,
-			String dt) {
-		String notifyurl = AbSharedUtil.getString(context, "notifyurl");
-		String signkey = AbSharedUtil.getString(context, "signkey");
-		sendmsg(context, "订单" + no + "重试发送异步通知...");
-		if (TextUtils.isEmpty(notifyurl) || TextUtils.isEmpty(signkey)) {
-			sendmsg(context, "发送异步通知异常，异步通知地址为空");
-			update(no, "异步通知地址为空");
-			return;
-		}
-		
-		String account="";
-		String balance=AbSharedUtil.getString(context, type+"balance");
-		if(type.equals("alipay")){
-			account=AbSharedUtil.getString(context, "alipay");
-		}else if(type.equals("wechat")){
-			account=AbSharedUtil.getString(context, "wechat");
-		}else if(type.equals("qq")){
-			account=AbSharedUtil.getString(context, "qq");
-		}
-		
-		HttpUtils httpUtils = new HttpUtils(15000);
-
-		String sign = MD5.md5(dt + mark + money + no + type + signkey);
-		RequestParams params = new RequestParams();
-		params.addBodyParameter("type", type);
-		params.addBodyParameter("no", no);
-		params.addBodyParameter("money", money);
-		params.addBodyParameter("mark", mark);
-		params.addBodyParameter("dt", dt);
-		params.addBodyParameter("balance", balance);
-		if (!TextUtils.isEmpty(account)) {
-			params.addBodyParameter("account", account);
-		}
-		params.addBodyParameter("sign", sign);
-		httpUtils.send(HttpMethod.POST, notifyurl, params, new RequestCallBack<String>() {
-
-			@Override
-			public void onFailure(HttpException arg0, String arg1) {
-				sendmsg(context, "发送异步通知异常，服务器异常" + arg1);
-				update(no, arg1);
+	public static void notify(final Context context, String type, final String no, String money, String mark, String bill_time) {
+		try {
+			String notifyurl= AbSharedUtil.getString(context, "notify_zfb");
+			if (TextUtils.isEmpty(notifyurl)) {
+				sendmsg(context,"发送异步通知异常，异步通知地址为空");
+				update(no, "异步通知地址为空");
+				return;
 			}
 
-			@Override
-			public void onSuccess(ResponseInfo<String> arg0) {
-				String result = arg0.result;
-				if (result.contains("success")) {
-					sendmsg(context, "发送异步通知成功，服务器返回" + result);
-				} else {
-					sendmsg(context, "发送异步通知失败，服务器返回" + result);
+			String account = "";
+			if (type.equals("alipay")) {
+				account = AbSharedUtil.getString(context, "account");
+			} else if (type.equals("wechat")) {
+				account = AbSharedUtil.getString(context, "wechat");
+			} else if (type.equals("qq")) {
+				account = AbSharedUtil.getString(context, "qq");
+			}
+
+			HttpUtils httpUtils = new HttpUtils(15000);
+			RequestParams params = new RequestParams();
+			params.addBodyParameter("type", type);
+			params.addBodyParameter("order", no);
+			params.addBodyParameter("money", money);
+			params.addBodyParameter("title", mark);
+			params.addBodyParameter("time", bill_time);
+			params.addBodyParameter("account",account);
+
+			sendmsg(context,"{'type':'"+type+"','order':'"+no+"','money':'"+money+"'" +
+					",'title':'"+mark+"','time':'"+bill_time+"','account':'"+account+"'}");
+			httpUtils.send(HttpMethod.POST, notifyurl, params, new RequestCallBack<String>() {
+
+				@Override
+				public void onFailure(HttpException arg0, String arg1) {
+					sendmsg(context,"发送异步通知异常，服务器异常" + arg1);
+					update(no, arg1);
 				}
-				update(no, result);
-			}
-		});
+
+				@Override
+				public void onSuccess(ResponseInfo<String> arg0) {
+					String result = arg0.result;
+					if (result.contains("success")) {
+						sendmsg(context,"发送异步通知成功，服务器返回" + result);
+					} else {
+						sendmsg(context,"发送异步通知失败，服务器返回" + result);
+					}
+					update(no, result);
+				}
+			});
+		} catch (Exception e) {
+			sendmsg(context,"notifyapi异常" + e.getMessage());
+		}
 	}
+
+//	public static void notify(final Context context, String type, final String no, String money, String mark,
+//			String dt) {
+//		String notifyurl = AbSharedUtil.getString(context, "notifyurl");
+//		String signkey = AbSharedUtil.getString(context, "signkey");
+//		sendmsg(context, "订单" + no + "重试发送异步通知...");
+//		if (TextUtils.isEmpty(notifyurl) || TextUtils.isEmpty(signkey)) {
+//			sendmsg(context, "发送异步通知异常，异步通知地址为空");
+//			update(no, "异步通知地址为空");
+//			return;
+//		}
+//
+//		String account="";
+//		String balance=AbSharedUtil.getString(context, type+"balance");
+//		if(type.equals("alipay")){
+//			account=AbSharedUtil.getString(context, "alipay");
+//		}else if(type.equals("wechat")){
+//			account=AbSharedUtil.getString(context, "wechat");
+//		}else if(type.equals("qq")){
+//			account=AbSharedUtil.getString(context, "qq");
+//		}
+//
+//		HttpUtils httpUtils = new HttpUtils(15000);
+//
+//		String sign = MD5.md5(dt + mark + money + no + type + signkey);
+//		RequestParams params = new RequestParams();
+//		params.addBodyParameter("type", type);
+//		params.addBodyParameter("no", no);
+//		params.addBodyParameter("money", money);
+//		params.addBodyParameter("mark", mark);
+//		params.addBodyParameter("dt", dt);
+//		params.addBodyParameter("balance", balance);
+//		if (!TextUtils.isEmpty(account)) {
+//			params.addBodyParameter("account", account);
+//		}
+//		params.addBodyParameter("sign", sign);
+//		httpUtils.send(HttpMethod.POST, notifyurl, params, new RequestCallBack<String>() {
+//
+//			@Override
+//			public void onFailure(HttpException arg0, String arg1) {
+//				sendmsg(context, "发送异步通知异常，服务器异常" + arg1);
+//				update(no, arg1);
+//			}
+//
+//			@Override
+//			public void onSuccess(ResponseInfo<String> arg0) {
+//				String result = arg0.result;
+//				if (result.contains("success")) {
+//					sendmsg(context, "发送异步通知成功，服务器返回" + result);
+//				} else {
+//					sendmsg(context, "发送异步通知失败，服务器返回" + result);
+//				}
+//				update(no, result);
+//			}
+//		});
+//	}
 
 	private static void update(String no, String result) {
 		DBManager dbManager = new DBManager(CustomApplcation.getInstance().getApplicationContext());

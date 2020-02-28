@@ -297,10 +297,10 @@ public class MainActivity extends Activity{
                     String money = intent.getStringExtra("bill_money");
                     String mark = intent.getStringExtra("bill_mark");
                     String type = intent.getStringExtra("bill_type");
-                    String payUrl = intent.getStringExtra("bill_qr_code");
-                    String bill_account = intent.getStringExtra("bill_account");
+//                    String payUrl = intent.getStringExtra("bill_qr_code");
+//                    String bill_account = intent.getStringExtra("bill_account");
                     String bill_time = intent.getStringExtra("bill_time");
-                    String bill_userId = intent.getStringExtra("bill_userId");
+//                    String bill_userId = intent.getStringExtra("bill_userId");
 
 
                     DBManager dbManager = new DBManager(CustomApplcation.getInstance().getApplicationContext());
@@ -343,7 +343,7 @@ public class MainActivity extends Activity{
 //                        }
 //                    });
 
-                    notifyapi(type, no, money, mark, bill_time, payUrl,bill_account,bill_userId);
+                    notifyapi(type, no, money, mark, bill_time);
                 } else if (intent.getAction().contentEquals(SMSMSG_ACTION)) {
                     sendmsg("短信开始异步回调"+intent.getStringExtra("json"));
                     notifyapi("sms",intent.getStringExtra("json"));
@@ -419,7 +419,7 @@ public class MainActivity extends Activity{
                                             String dt = System.currentTimeMillis() + "";
                                             dbManager.addOrder(new OrderBean(money, mark, "alipay", tradeno, dt, "", 0));
 //                                            sendmsg("收到[支付宝]订单,订单号：[" + tradeno + "]金额：[" + money + "]备注：[" + _mark +"]payurl: [] userid:["+userId+"] bill_account: [] bill_time["+dt+"]");
-                                            notifyapi("alipay", tradeno, money, _mark, dt,"","",userId);
+                                            notifyapi("alipay", tradeno, money, _mark, dt);
                                         }
                                     } catch (Exception e) {
                                         PayHelperUtils.sendmsg(context, "TRADENORECEIVED_ACTION-->>onSuccess异常" + e.getMessage());
@@ -503,7 +503,7 @@ public class MainActivity extends Activity{
             }
         }
 
-        public void notifyapi(String type, final String no, String money, String mark, String bill_time,String payUrl,String bill_account,String bill_userId) {
+        public void notifyapi(String type, final String no, String money, String mark, String bill_time) {
             try {
                 String notifyurl= AbSharedUtil.getString(getApplicationContext(), "notify_zfb");
                 String signkey = AbSharedUtil.getString(getApplicationContext(), "signkey");

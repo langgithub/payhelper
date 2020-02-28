@@ -154,6 +154,8 @@ public class AlipayHook {
 							XposedBridge.log("======获取自付宝备注"+_mark+"(money="+money+")=========");
 							if(!"null".equals(_mark)){
 								mark=_mark;
+							}else {
+								mark="";
 							}
 
                 			Intent broadCastIntent = new Intent();
@@ -161,10 +163,10 @@ public class AlipayHook {
                             broadCastIntent.putExtra("bill_money", money);
                             broadCastIntent.putExtra("bill_mark", mark);
                             broadCastIntent.putExtra("bill_type", "alipay");
-							broadCastIntent.putExtra("bill_qr_code", getQrCodeUrl());
-							broadCastIntent.putExtra("bill_account",account);
+//							broadCastIntent.putExtra("bill_qr_code", getQrCodeUrl());
+//							broadCastIntent.putExtra("bill_account",account);
 							broadCastIntent.putExtra("bill_time",time);
-							broadCastIntent.putExtra("bill_userId",userId);
+//							broadCastIntent.putExtra("bill_userId",userId);
                             broadCastIntent.setAction(BILLRECEIVED_ACTION);
                             context.sendBroadcast(broadCastIntent);
             			}
@@ -203,7 +205,7 @@ public class AlipayHook {
                             broadCastIntent.putExtra("bill_money", money);
                             broadCastIntent.putExtra("bill_mark", "");
                             broadCastIntent.putExtra("bill_time", time);
-                            broadCastIntent.putExtra("payurl", "alipay_dy");
+//                            broadCastIntent.putExtra("payurl", "alipay_dy");
                             broadCastIntent.setAction(BILLRECEIVED_ACTION);
                             context.sendBroadcast(broadCastIntent);
 						}else if(content.contains("收钱到账") || content.contains("收款到账")){
@@ -212,6 +214,9 @@ public class AlipayHook {
 							XposedBridge.log(userId+" "+alipaycookie);
 							DBManager dbManager = new DBManager(context.getApplicationContext());
 							String _mark = dbManager.getMark(_money);
+							if("null".equals(_mark)){
+								_mark="";
+							}
 							XposedBridge.log("======获取自付宝备注"+_mark+"(money="+_money+")=========");
 							PayHelperUtils.getBill(context,alipaycookie,userId,_mark);
 						}
