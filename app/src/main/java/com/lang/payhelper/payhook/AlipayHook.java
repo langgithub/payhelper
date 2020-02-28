@@ -54,6 +54,9 @@ public class AlipayHook {
 	public String qrCodeUrl;
 
 	public void setQrCodeUrl(String qrCodeUrl) {
+		if ("".equals(qrCodeUrl)){
+			return;
+		}
 		this.qrCodeUrl = qrCodeUrl;
 	}
 
