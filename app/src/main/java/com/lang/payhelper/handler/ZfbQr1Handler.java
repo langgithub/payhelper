@@ -22,14 +22,12 @@ public class ZfbQr1Handler implements SekiroRequestHandler {
         try{
             String bz = sekiroRequest.getString("bz");
 //          String je = sekiroRequest.getString("je");
+            Log.i("Xposed","handleRequest request"+(sekiroRequest.getString("je")));
             String je = RSAMethod.privateDeData(sekiroRequest.getString("je"),RSAUtils.PRIVATE_KEY);
-
             ZfbApp zfbApp = ZfbApp.newInstance();
-            Log.i("Xposed","handleRequest request"+(zfbApp.getContext()!=null));
-
             // 绑定与xposed通讯
             Store.requestTaskMap.put(zfbApp, sekiroResponse);
-            if (zfbApp.getContext()!=null){
+            if (zfbApp.getContext()!=null && je!=null){
                 Log.i("Xposed","handleRequest start");
                 PayHelperUtils.sendmsg(zfbApp.getContext(),"handleRequest {'bz':'"+bz+"','je':'"+je+"'}");
                 DBManager dbManager = new DBManager(zfbApp.getContext().getApplicationContext());
@@ -48,7 +46,7 @@ public class ZfbQr1Handler implements SekiroRequestHandler {
             }else {
                 sekiroResponse = Store.requestTaskMap.remove(zfbApp);
                 if(sekiroResponse!=null){
-                    sekiroResponse.success("获取失败，getContext is null");
+                    sekiroResponse.success("je is null");
                 }
             }
         }catch (Exception e){

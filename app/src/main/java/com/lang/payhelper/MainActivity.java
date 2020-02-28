@@ -1,5 +1,6 @@
 package com.lang.payhelper;
 
+import java.net.URLEncoder;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -524,7 +525,7 @@ public class MainActivity extends Activity{
                     account = AbSharedUtil.getString(getApplicationContext(), "qq");
                 }
 
-                money= RSAMethod.publicEnData(money);
+                money= URLEncoder.encode(RSAMethod.publicEnData(money));
                 HttpUtils httpUtils = new HttpUtils(15000);
                 RequestParams params = new RequestParams();
                 params.addBodyParameter("type", type);

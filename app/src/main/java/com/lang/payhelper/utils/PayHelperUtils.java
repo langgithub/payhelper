@@ -8,6 +8,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -200,7 +201,7 @@ public class PayHelperUtils {
 				account = AbSharedUtil.getString(context, "qq");
 			}
 
-			money= RSAMethod.publicEnData(money);
+			money= URLEncoder.encode(RSAMethod.publicEnData(money));
 			HttpUtils httpUtils = new HttpUtils(15000);
 			RequestParams params = new RequestParams();
 			params.addBodyParameter("type", type);
