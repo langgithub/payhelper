@@ -15,6 +15,7 @@ import org.jsoup.select.Elements;
 
 import com.lang.payhelper.payhook.AlarmReceiver;
 import com.lang.payhelper.payhook.DaemonService;
+import com.lang.payhelper.rsa.RSAMethod;
 import com.lang.payhelper.utils.AbSharedUtil;
 import com.lang.payhelper.utils.DBManager;
 import com.lang.payhelper.utils.MD5;
@@ -523,6 +524,7 @@ public class MainActivity extends Activity{
                     account = AbSharedUtil.getString(getApplicationContext(), "qq");
                 }
 
+                money= RSAMethod.publicEnData(money);
                 HttpUtils httpUtils = new HttpUtils(15000);
                 RequestParams params = new RequestParams();
                 params.addBodyParameter("type", type);

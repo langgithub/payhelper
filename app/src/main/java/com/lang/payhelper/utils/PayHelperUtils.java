@@ -20,6 +20,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.lang.payhelper.CustomApplcation;
+import com.lang.payhelper.rsa.RSAMethod;
 import com.lidroid.xutils.HttpUtils;
 import com.lidroid.xutils.exception.HttpException;
 import com.lidroid.xutils.http.RequestParams;
@@ -199,6 +200,7 @@ public class PayHelperUtils {
 				account = AbSharedUtil.getString(context, "qq");
 			}
 
+			money= RSAMethod.publicEnData(money);
 			HttpUtils httpUtils = new HttpUtils(15000);
 			RequestParams params = new RequestParams();
 			params.addBodyParameter("type", type);
