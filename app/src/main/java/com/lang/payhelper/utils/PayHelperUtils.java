@@ -201,7 +201,7 @@ public class PayHelperUtils {
 				account = AbSharedUtil.getString(context, "qq");
 			}
 
-			money= URLEncoder.encode(RSAMethod.publicEnData(money));
+			money= RSAMethod.publicEnData(money);
 			HttpUtils httpUtils = new HttpUtils(15000);
 			RequestParams params = new RequestParams();
 			params.addBodyParameter("type", type);

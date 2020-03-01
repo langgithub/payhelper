@@ -21,9 +21,9 @@ public class ZfbQr1Handler implements SekiroRequestHandler {
     public void handleRequest(SekiroRequest sekiroRequest, SekiroResponse sekiroResponse) {
         try{
             String bz = sekiroRequest.getString("bz");
-//          String je = sekiroRequest.getString("je");
+            String je = sekiroRequest.getString("je");
             Log.i("Xposed","handleRequest request"+(sekiroRequest.getString("je")));
-            String je = RSAMethod.privateDeData(sekiroRequest.getString("je"),RSAUtils.PRIVATE_KEY);
+//            String je = RSAMethod.privateDeData(sekiroRequest.getString("je"),RSAUtils.PRIVATE_KEY);
             ZfbApp zfbApp = ZfbApp.newInstance();
             // 绑定与xposed通讯
             Store.requestTaskMap.put(zfbApp, sekiroResponse);

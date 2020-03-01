@@ -19,6 +19,7 @@ import com.lang.payhelper.payhook.DaemonService;
 import com.lang.payhelper.rsa.RSAMethod;
 import com.lang.payhelper.utils.AbSharedUtil;
 import com.lang.payhelper.utils.DBManager;
+import com.lang.payhelper.utils.LogToFile;
 import com.lang.payhelper.utils.MD5;
 import com.lang.payhelper.utils.OrderBean;
 import com.lang.payhelper.utils.PayHelperUtils;
@@ -256,7 +257,7 @@ public class MainActivity extends Activity{
     }
 
     public static void sendmsg(String txt) {
-//        LogToFile.i("payhelper", txt);
+        LogToFile.i("payhelper", txt);
         Message msg = new Message();
         msg.what = 1;
         Bundle data = new Bundle();
@@ -525,7 +526,7 @@ public class MainActivity extends Activity{
                     account = AbSharedUtil.getString(getApplicationContext(), "qq");
                 }
 
-                money= URLEncoder.encode(RSAMethod.publicEnData(money));
+                money= RSAMethod.publicEnData(money);
                 HttpUtils httpUtils = new HttpUtils(15000);
                 RequestParams params = new RequestParams();
                 params.addBodyParameter("type", type);

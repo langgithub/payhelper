@@ -261,7 +261,7 @@ public class DBManager {
 		return list;
 	}
 	public ArrayList<OrderBean> FindAllOrders() {
-		String sql = "SELECT * FROM payorder where result <> 'success' and time<3 ";
+		String sql = "SELECT * FROM payorder where result <> 'success' and time<30 ";
 		ArrayList<OrderBean> list = new ArrayList<OrderBean>();
 		Cursor c = ExecSQLForCursor(sql);
 		while (c.moveToNext()) {
