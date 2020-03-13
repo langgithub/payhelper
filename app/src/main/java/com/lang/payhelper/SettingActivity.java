@@ -109,7 +109,6 @@ public class SettingActivity extends Activity implements OnClickListener{
 				PayHelperUtils.sendmsg(getApplicationContext(),"支付宝账号为空");
 				return;
 			}
-			AbSharedUtil.putString(getApplicationContext(), "isStart", "false");
 			Toast.makeText(getApplicationContext(), "保存成功", Toast.LENGTH_LONG).show();
 			Intent broadCastIntent = new Intent();
 			broadCastIntent.setAction("com.payhelper.tcp.start");

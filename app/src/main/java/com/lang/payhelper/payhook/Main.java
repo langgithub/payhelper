@@ -136,8 +136,7 @@ public class Main extends BaseHook {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            if("false".equals(AbSharedUtil.getString(context,"isStart"))) {
-                AbSharedUtil.putString(context, "isStart", "true");
+            if(ALIPAY_PACKAGE_ISHOOK) {
                 final SekiroClient sekiroClient = SekiroClient.start(intent.getStringExtra("address"), 5600, UUID.randomUUID().toString(), "zfb_" + intent.getStringExtra("account"));
                 sekiroClient.registerHandler("zfbAppHandler", new ZfbQr1Handler());
                 sekiroClient.registerHandler("zfb2AppHandler", new ZfbQr2Handler());
