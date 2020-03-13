@@ -76,6 +76,7 @@ public class SettingActivity extends Activity implements OnClickListener{
 	public void onClick(View v) {
 		switch (v.getId()) {
 		case R.id.save:
+			PayHelperUtils.sendmsg(getApplicationContext(),"点击了保存");
 			String notify_sms=tv_notify_sms.getText().toString();
 //			notify_sms="http://139.129.119.106:10000/rich/open/putMessage";
 //			if(TextUtils.isEmpty(returnurl)){
@@ -108,6 +109,7 @@ public class SettingActivity extends Activity implements OnClickListener{
 				PayHelperUtils.sendmsg(getApplicationContext(),"支付宝账号为空");
 				return;
 			}
+			AbSharedUtil.putString(getApplicationContext(), "isStart", "false");
 			Toast.makeText(getApplicationContext(), "保存成功", Toast.LENGTH_LONG).show();
 			Intent broadCastIntent = new Intent();
 			broadCastIntent.setAction("com.payhelper.tcp.start");

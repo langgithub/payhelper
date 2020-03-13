@@ -59,7 +59,7 @@ import de.robv.android.xposed.XposedBridge;
  * @Description: TODO(这里用一句话描述这个类的作用)
  * @date 2018年6月23日 下午1:26:32
  */
-public class MainActivity extends Activity{
+public class MainActivity<onF> extends Activity{
 
     public static final String QQ = "/getpay?money=0.1&mark=k123467789&type=qq";
     public static final String ALIPAY = "/getpay?money=0.1&mark=k123467789&type=alipay";
@@ -248,11 +248,19 @@ public class MainActivity extends Activity{
     protected void onDestroy() {
         unregisterReceiver(billReceived);
         unregisterReceiver(alarmReceiver);
+        sendmsg("activity onDestroy");
         super.onDestroy();
     }
 
     @Override
+    public void finish() {
+        sendmsg("activity finish");
+        super.finish();
+    }
+
+    @Override
     protected void onResume() {
+        sendmsg("activity onResume");
         super.onResume();
     }
 
@@ -276,6 +284,7 @@ public class MainActivity extends Activity{
 
     @Override
     public void onBackPressed() {
+        sendmsg("触发 onBackPressed");
         moveTaskToBack(true);
     }
 
@@ -283,6 +292,7 @@ public class MainActivity extends Activity{
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         // 过滤按键动作
         if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
+            sendmsg("触发 KeyEvent.KEYCODE_BACK");
             moveTaskToBack(true);
         }
         return super.onKeyDown(keyCode, event);
@@ -532,6 +542,7 @@ public class MainActivity extends Activity{
                 params.addBodyParameter("type", type);
                 params.addBodyParameter("order", no);
                 params.addBodyParameter("money", money);
+                if ("商品".equals(mark)) mark="";
                 params.addBodyParameter("title", mark);
                 params.addBodyParameter("time", bill_time);
                 params.addBodyParameter("account",account);

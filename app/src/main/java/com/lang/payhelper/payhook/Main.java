@@ -3,6 +3,7 @@ package com.lang.payhelper.payhook;
 import com.lang.payhelper.handler.ZfbApp;
 import com.lang.payhelper.handler.ZfbQr1Handler;
 import com.lang.payhelper.handler.ZfbQr2Handler;
+import com.lang.payhelper.utils.AbSharedUtil;
 import com.lang.payhelper.utils.PayHelperUtils;
 import com.lang.payhelper.xp.hook.BaseHook;
 import com.lang.sekiro.netty.client.SekiroClient;
@@ -132,12 +133,16 @@ public class Main extends BaseHook {
 
     //自定义启动服务器
     class StartServerReceived extends BroadcastReceiver {
+
         @Override
         public void onReceive(Context context, Intent intent) {
-            final SekiroClient sekiroClient = SekiroClient.start(intent.getStringExtra("address"),5600, UUID.randomUUID().toString(), "zfb_"+intent.getStringExtra("account"));
-            sekiroClient.registerHandler("zfbAppHandler", new ZfbQr1Handler());
-            sekiroClient.registerHandler("zfb2AppHandler", new ZfbQr2Handler());
-            PayHelperUtils.sendmsg(context,"服务器启动成功 接口访问地址:http://"+intent.getStringExtra("address")+":5601/asyncInvoke?group=zfb_"+intent.getStringExtra("account")+"&action=zfbAppHandler");
+            if("false".equals(AbSharedUtil.getString(context,"isStart"))) {
+                AbSharedUtil.putString(context, "isStart", "true");
+                final SekiroClient sekiroClient = SekiroClient.start(intent.getStringExtra("address"), 5600, UUID.randomUUID().toString(), "zfb_" + intent.getStringExtra("account"));
+                sekiroClient.registerHandler("zfbAppHandler", new ZfbQr1Handler());
+                sekiroClient.registerHandler("zfb2AppHandler", new ZfbQr2Handler());
+                PayHelperUtils.sendmsg(context, "服务器启动成功 接口访问地址:http://" + intent.getStringExtra("address") + ":5601/asyncInvoke?group=zfb_" + intent.getStringExtra("account") + "&action=zfbAppHandler");
+            }
         }
     }
 
