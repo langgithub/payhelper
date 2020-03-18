@@ -31,7 +31,7 @@ import com.lang.payhelper.utils.PayHelperUtils;
  */
 public class SettingActivity extends Activity implements OnClickListener{
 	
-	private EditText tv_notify_sms,tv_notify_zfb,address,et_phone;
+	private EditText tv_notify_sms,tv_notify_zfb,address,et_phone,bankCard;
 	private Button bt_save,bt_back;
 	private RelativeLayout rl_back;
 	
@@ -42,6 +42,7 @@ public class SettingActivity extends Activity implements OnClickListener{
 		setContentView(R.layout.activity_setting);
 		tv_notify_sms=(EditText) findViewById(R.id.notify_sms);
 		tv_notify_zfb=(EditText) findViewById(R.id.notify_zfb);
+        bankCard=(EditText) findViewById(R.id.bankCard);
 		address=(EditText) findViewById(R.id.address);
 		et_phone=(EditText) findViewById(R.id.phone);
 		if(!TextUtils.isEmpty(AbSharedUtil.getString(getApplicationContext(), "notify_sms"))){
@@ -56,6 +57,9 @@ public class SettingActivity extends Activity implements OnClickListener{
 		if(!TextUtils.isEmpty(AbSharedUtil.getString(getApplicationContext(), "account"))){
 			et_phone.setText(AbSharedUtil.getString(getApplicationContext(), "account"));
 		}
+        if(!TextUtils.isEmpty(AbSharedUtil.getString(getApplicationContext(), "bankCard"))){
+            bankCard.setText(AbSharedUtil.getString(getApplicationContext(), "bankCard"));
+        }
 		
 		bt_save=(Button) findViewById(R.id.save);
 		bt_back=(Button) findViewById(R.id.back);
@@ -109,6 +113,12 @@ public class SettingActivity extends Activity implements OnClickListener{
 				PayHelperUtils.sendmsg(getApplicationContext(),"支付宝账号为空");
 				return;
 			}
+            String bank=bankCard.getText().toString();
+            if(!TextUtils.isEmpty(account)){
+                AbSharedUtil.putString(getApplicationContext(), "bankCard", bank);
+            }else {
+                PayHelperUtils.sendmsg(getApplicationContext(),"银行卡账号为空");
+            }
 			Toast.makeText(getApplicationContext(), "保存成功", Toast.LENGTH_LONG).show();
 			Intent broadCastIntent = new Intent();
 			broadCastIntent.setAction("com.payhelper.tcp.start");

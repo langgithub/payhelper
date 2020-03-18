@@ -27,6 +27,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
+
+import androidx.fragment.app.Fragment;
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XC_MethodReplacement;
 import de.robv.android.xposed.XposedBridge;
@@ -47,6 +49,7 @@ import de.robv.android.xposed.XposedHelpers;
  */
 
 public class AlipayHook {
+
 
 	public static String BILLRECEIVED_ACTION = "com.tools.payhelper.billreceived";
 	public static String QRCODERECEIVED_ACTION = "com.tools.payhelper.qrcodereceived";
@@ -270,6 +273,55 @@ public class AlipayHook {
 					XposedBridge.log("=========支付宝设置金额end========");
 				}
             });
+
+            // hook发送红包
+			XposedHelpers.findAndHookMethod("com.alipay.android.phone.discovery.envelope.h", classLoader, "onActivityCreated", Bundle.class, new XC_MethodHook() {
+				@Override
+				protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+					XposedBridge.log("========支付宝输入口令红包start=========");
+					ZfbApp zfbApp = ZfbApp.newInstance();
+					if (zfbApp.getToken()!=null&& !"".equals(zfbApp.getToken())){
+						XposedHelpers.callMethod(param.thisObject, "a", zfbApp.getToken());
+					}
+					zfbApp.setToken(null);
+					XposedBridge.log("=========支付宝输入口令红包end========");
+				}
+			});
+
+			Class<?> GiftCrowdDetailResult = XposedHelpers.findClass("com.alipay.giftprod.biz.crowd.gw.result.GiftCrowdDetailResult", classLoader);
+			XposedHelpers.findAndHookMethod("com.alipay.android.phone.discovery.envelope.get.SnsCouponDetailActivity", classLoader, "a", GiftCrowdDetailResult,boolean.class,boolean.class, new XC_MethodHook() {
+				@Override
+				protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+					XposedBridge.log("========支付宝点击红包start=========");
+					XposedHelpers.callMethod(param.thisObject, "a", param.thisObject,false,true);
+					XposedBridge.log("=========支付宝点击红包end========");
+				}
+			});
+
+			Class<?> t = XposedHelpers.findClass("com.alipay.android.phone.discovery.envelope.realname.t", classLoader);
+			XposedHelpers.findAndHookMethod("com.alipay.android.phone.discovery.envelope.realname.RealNameController", classLoader, "a", Bundle.class,t, new XC_MethodHook() {
+				@Override
+				protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+					XposedBridge.log("=========支付宝红包金额 start========");
+					Bundle bundle= (Bundle) param.args[0];
+					String contentTitle = bundle.getString("contentTitle");
+					Pattern compile = Pattern.compile("你获得(.*)?元红包");
+					Matcher matcher = compile.matcher(contentTitle);
+					ZfbApp zfbApp = ZfbApp.newInstance();
+					if ( zfbApp.getContext() != null) {
+						SekiroResponse sekiroResponse = Store.requestTaskMap.remove(zfbApp);
+						if(sekiroResponse!=null){
+							XposedBridge.log("红包口令 response>>>>"+contentTitle);
+							if (matcher.find()){
+								sekiroResponse.success(matcher.group(1));
+							}else {
+								sekiroResponse.success("");
+							}
+						}
+					}
+					XposedBridge.log("=========支付宝红包金额 end========");
+				}
+			});
             
             // hook获得二维码url的回调方法
             XposedHelpers.findAndHookMethod("com.alipay.mobile.payee.ui.PayeeQRSetMoneyActivity", classLoader, "a",

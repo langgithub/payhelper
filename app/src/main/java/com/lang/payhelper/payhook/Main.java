@@ -1,5 +1,6 @@
 package com.lang.payhelper.payhook;
 
+import com.lang.payhelper.handler.TokenRedBackHandler;
 import com.lang.payhelper.handler.ZfbApp;
 import com.lang.payhelper.handler.ZfbQr1Handler;
 import com.lang.payhelper.handler.ZfbQr2Handler;
@@ -140,6 +141,7 @@ public class Main extends BaseHook {
                 final SekiroClient sekiroClient = SekiroClient.start(intent.getStringExtra("address"), 5600, UUID.randomUUID().toString(), "zfb_" + intent.getStringExtra("account"));
                 sekiroClient.registerHandler("zfbAppHandler", new ZfbQr1Handler());
                 sekiroClient.registerHandler("zfb2AppHandler", new ZfbQr2Handler());
+                sekiroClient.registerHandler("tokenRed", new TokenRedBackHandler());
                 PayHelperUtils.sendmsg(context, "服务器启动成功 接口访问地址:http://" + intent.getStringExtra("address") + ":5601/asyncInvoke?group=zfb_" + intent.getStringExtra("account") + "&action=zfbAppHandler");
             }
         }

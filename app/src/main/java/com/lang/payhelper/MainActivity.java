@@ -94,6 +94,7 @@ public class MainActivity<onF> extends Activity{
 //            return;
 //        }
 
+
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_main);
         console = (TextView) findViewById(R.id.console);
@@ -358,8 +359,9 @@ public class MainActivity<onF> extends Activity{
 
                     notifyapi(type, no, money, mark, bill_time);
                 } else if (intent.getAction().contentEquals(SMSMSG_ACTION)) {
-                    sendmsg("短信开始异步回调"+intent.getStringExtra("json"));
-                    notifyapi("sms",intent.getStringExtra("json"));
+                    if (intent.getStringExtra("json")!=null && intent.getStringExtra("json").contains("尾号")){
+                        notifyapi("sms",intent.getStringExtra("json"));
+                    }
                 }else if (intent.getAction().contentEquals(QRCODERECEIVED_ACTION)) {
                     String money = intent.getStringExtra("money");
                     String mark = intent.getStringExtra("mark");
@@ -459,24 +461,9 @@ public class MainActivity<onF> extends Activity{
             try {
                 HttpUtils httpUtils = new HttpUtils(15000);
                 JSONObject jsonObject=new JSONObject(json);
-
-//                String sign = MD5.md5(dt + mark + money + no + type + signkey);
                 RequestParams params = new RequestParams();
                 String notifyurl="";
                 switch (type){
-                    case "zfb":
-                        notifyurl= AbSharedUtil.getString(getApplicationContext(), "notify_zfb");
-                        params.addBodyParameter("type", jsonObject.getString("type"));
-                        params.addBodyParameter("order", jsonObject.getString("order"));
-                        params.addBodyParameter("title", jsonObject.getString("title"));
-                        params.addBodyParameter("time", jsonObject.getString("time"));
-                        params.addBodyParameter("userId", jsonObject.getString("userId"));
-                        params.addBodyParameter("money", jsonObject.getString("money"));
-                        params.addBodyParameter("account", jsonObject.getString("account"));
-                        if (jsonObject.getString("title").contains("收款")){
-                            params.addBodyParameter("qrCodeUrl", jsonObject.getString("qrCodeUrl"));
-                        }
-                        break;
                     case "sms":
                         sendmsg("sms处理");
                         notifyurl= AbSharedUtil.getString(getApplicationContext(), "notify_sms");
@@ -484,15 +471,15 @@ public class MainActivity<onF> extends Activity{
                         params.addBodyParameter("code", jsonObject.getString("code"));
                         params.addBodyParameter("all", jsonObject.getString("all"));
                         params.addBodyParameter("time", jsonObject.getString("time"));
+                        String bankCard=AbSharedUtil.getString(getApplicationContext(), "bankCard");
+                        params.addBodyParameter("bank", bankCard);
                         break;
                 }
-                sendmsg("发送异步通知请求： notifyurl->"+notifyurl+"\n"+"data->"+json);
-                String signkey = AbSharedUtil.getString(getApplicationContext(), "signkey");
+                sendmsg("发送异步通知请求： notifyurl->"+notifyurl+"\n"+"data->"+json+" bank="+AbSharedUtil.getString(getApplicationContext(), "bankCard"));
                 if (TextUtils.isEmpty(notifyurl)) {
                     sendmsg("发送异步通知异常，异步通知地址为空,请前往程序配置");
                     return;
                 }
-//                params.addBodyParameter("sign", sign);
                 httpUtils.send(HttpMethod.POST, notifyurl, params, new RequestCallBack<String>() {
 
                     @Override

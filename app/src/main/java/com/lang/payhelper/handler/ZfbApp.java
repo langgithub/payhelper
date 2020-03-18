@@ -18,6 +18,17 @@ public class ZfbApp {
         return context;
     }
 
+    private String token;
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+
     private ZfbApp(){}
 
     public static ZfbApp newInstance(){
