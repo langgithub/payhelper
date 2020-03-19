@@ -18,6 +18,36 @@ public class ZfbApp {
         return context;
     }
 
+    private String token;
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    private Object pointer;
+
+    private Object pointer2;
+
+    public void setPointer2(Object pointer2) {
+        this.pointer2 = pointer2;
+    }
+
+    public Object getPointer2() {
+        return pointer2;
+    }
+
+    public void setPointer(Object pointer) {
+        this.pointer = pointer;
+    }
+
+    public Object getPointer() {
+        return pointer;
+    }
+
     private ZfbApp(){}
 
     public static ZfbApp newInstance(){

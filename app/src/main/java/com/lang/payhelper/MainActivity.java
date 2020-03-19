@@ -1,5 +1,6 @@
 package com.lang.payhelper;
 
+import java.net.URLEncoder;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -15,8 +16,10 @@ import org.jsoup.select.Elements;
 
 import com.lang.payhelper.payhook.AlarmReceiver;
 import com.lang.payhelper.payhook.DaemonService;
+import com.lang.payhelper.rsa.RSAMethod;
 import com.lang.payhelper.utils.AbSharedUtil;
 import com.lang.payhelper.utils.DBManager;
+import com.lang.payhelper.utils.LogToFile;
 import com.lang.payhelper.utils.MD5;
 import com.lang.payhelper.utils.OrderBean;
 import com.lang.payhelper.utils.PayHelperUtils;
@@ -56,7 +59,7 @@ import de.robv.android.xposed.XposedBridge;
  * @Description: TODO(这里用一句话描述这个类的作用)
  * @date 2018年6月23日 下午1:26:32
  */
-public class MainActivity extends Activity{
+public class MainActivity<onF> extends Activity{
 
     public static final String QQ = "/getpay?money=0.1&mark=k123467789&type=qq";
     public static final String ALIPAY = "/getpay?money=0.1&mark=k123467789&type=alipay";
@@ -90,6 +93,7 @@ public class MainActivity extends Activity{
 //        if (!d()){
 //            return;
 //        }
+
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_main);
@@ -245,16 +249,24 @@ public class MainActivity extends Activity{
     protected void onDestroy() {
         unregisterReceiver(billReceived);
         unregisterReceiver(alarmReceiver);
+        sendmsg("activity onDestroy");
         super.onDestroy();
     }
 
     @Override
+    public void finish() {
+        sendmsg("activity finish");
+        super.finish();
+    }
+
+    @Override
     protected void onResume() {
+        sendmsg("activity onResume");
         super.onResume();
     }
 
     public static void sendmsg(String txt) {
-//        LogToFile.i("payhelper", txt);
+        LogToFile.i("payhelper", txt);
         Message msg = new Message();
         msg.what = 1;
         Bundle data = new Bundle();
@@ -273,6 +285,7 @@ public class MainActivity extends Activity{
 
     @Override
     public void onBackPressed() {
+        sendmsg("触发 onBackPressed");
         moveTaskToBack(true);
     }
 
@@ -280,6 +293,7 @@ public class MainActivity extends Activity{
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         // 过滤按键动作
         if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
+            sendmsg("触发 KeyEvent.KEYCODE_BACK");
             moveTaskToBack(true);
         }
         return super.onKeyDown(keyCode, event);
@@ -297,10 +311,10 @@ public class MainActivity extends Activity{
                     String money = intent.getStringExtra("bill_money");
                     String mark = intent.getStringExtra("bill_mark");
                     String type = intent.getStringExtra("bill_type");
-                    String payUrl = intent.getStringExtra("bill_qr_code");
-                    String bill_account = intent.getStringExtra("bill_account");
+//                    String payUrl = intent.getStringExtra("bill_qr_code");
+//                    String bill_account = intent.getStringExtra("bill_account");
                     String bill_time = intent.getStringExtra("bill_time");
-                    String bill_userId = intent.getStringExtra("bill_userId");
+//                    String bill_userId = intent.getStringExtra("bill_userId");
 
 
                     DBManager dbManager = new DBManager(CustomApplcation.getInstance().getApplicationContext());
@@ -318,7 +332,7 @@ public class MainActivity extends Activity{
                         typestr = "支付宝店员";
                         dt = intent.getStringExtra("time");
                     }
-                    sendmsg("收到[" + typestr + "]订单,订单号：[" + no + "]金额：[" + money + "]备注：[" + mark +"]payurl: ["+payUrl+"] userid:["+bill_userId+"] bill_account: ["+bill_account+"] bill_time["+bill_time+"]");
+//                    sendmsg("收到[" + typestr + "]订单,订单号：[" + no + "]金额：[" + money + "]备注：[" + mark +"]payurl: ["+payUrl+"] userid:["+bill_userId+"] bill_account: ["+bill_account+"] bill_time["+bill_time+"]");
 
                     String account = "";
                     if (type.equals("alipay")) {
@@ -343,10 +357,11 @@ public class MainActivity extends Activity{
 //                        }
 //                    });
 
-                    notifyapi(type, no, money, mark, bill_time, payUrl,bill_account,bill_userId);
+                    notifyapi(type, no, money, mark, bill_time);
                 } else if (intent.getAction().contentEquals(SMSMSG_ACTION)) {
-                    sendmsg("短信开始异步回调"+intent.getStringExtra("json"));
-                    notifyapi("sms",intent.getStringExtra("json"));
+                    if (intent.getStringExtra("json")!=null && intent.getStringExtra("json").contains("尾号")){
+                        notifyapi("sms",intent.getStringExtra("json"));
+                    }
                 }else if (intent.getAction().contentEquals(QRCODERECEIVED_ACTION)) {
                     String money = intent.getStringExtra("money");
                     String mark = intent.getStringExtra("mark");
@@ -388,6 +403,7 @@ public class MainActivity extends Activity{
                     final String tradeno = intent.getStringExtra("tradeno");
                     String cookie = intent.getStringExtra("cookie");
                     String userId = intent.getStringExtra("userId");
+                    final String _mark = intent.getStringExtra("mark");
                     final DBManager dbManager = new DBManager(CustomApplcation.getInstance().getApplicationContext());
                     if (!dbManager.isExistTradeNo(tradeno)) {
                         dbManager.addTradeNo(tradeno, "0");
@@ -417,12 +433,8 @@ public class MainActivity extends Activity{
                                             String mark = elements.get(3).ownText();
                                             String dt = System.currentTimeMillis() + "";
                                             dbManager.addOrder(new OrderBean(money, mark, "alipay", tradeno, dt, "", 0));
-                                            String _mark = dbManager.getMark(money);
-                                            if(!"null".equals(_mark)){
-                                                mark=_mark;
-                                            }
-                                            sendmsg("收到[支付宝]订单,订单号：[" + tradeno + "]金额：[" + money + "]备注：[" + mark +"]payurl: [] userid:["+userId+"] bill_account: [] bill_time["+dt+"]");
-                                            notifyapi("alipay", tradeno, money, mark, dt,"","",userId);
+//                                            sendmsg("收到[支付宝]订单,订单号：[" + tradeno + "]金额：[" + money + "]备注：[" + _mark +"]payurl: [] userid:["+userId+"] bill_account: [] bill_time["+dt+"]");
+                                            notifyapi("alipay", tradeno, money, _mark, dt);
                                         }
                                     } catch (Exception e) {
                                         PayHelperUtils.sendmsg(context, "TRADENORECEIVED_ACTION-->>onSuccess异常" + e.getMessage());
@@ -449,24 +461,9 @@ public class MainActivity extends Activity{
             try {
                 HttpUtils httpUtils = new HttpUtils(15000);
                 JSONObject jsonObject=new JSONObject(json);
-
-//                String sign = MD5.md5(dt + mark + money + no + type + signkey);
                 RequestParams params = new RequestParams();
                 String notifyurl="";
                 switch (type){
-                    case "zfb":
-                        notifyurl= AbSharedUtil.getString(getApplicationContext(), "notify_zfb");
-                        params.addBodyParameter("type", jsonObject.getString("type"));
-                        params.addBodyParameter("order", jsonObject.getString("order"));
-                        params.addBodyParameter("title", jsonObject.getString("title"));
-                        params.addBodyParameter("time", jsonObject.getString("time"));
-                        params.addBodyParameter("userId", jsonObject.getString("userId"));
-                        params.addBodyParameter("money", jsonObject.getString("money"));
-                        params.addBodyParameter("account", jsonObject.getString("account"));
-                        if (jsonObject.getString("title").contains("收款")){
-                            params.addBodyParameter("qrCodeUrl", jsonObject.getString("qrCodeUrl"));
-                        }
-                        break;
                     case "sms":
                         sendmsg("sms处理");
                         notifyurl= AbSharedUtil.getString(getApplicationContext(), "notify_sms");
@@ -474,15 +471,15 @@ public class MainActivity extends Activity{
                         params.addBodyParameter("code", jsonObject.getString("code"));
                         params.addBodyParameter("all", jsonObject.getString("all"));
                         params.addBodyParameter("time", jsonObject.getString("time"));
+                        String bankCard=AbSharedUtil.getString(getApplicationContext(), "bankCard");
+                        params.addBodyParameter("bank", bankCard);
                         break;
                 }
-                sendmsg("发送异步通知请求： notifyurl->"+notifyurl+"\n"+"data->"+json);
-                String signkey = AbSharedUtil.getString(getApplicationContext(), "signkey");
+                sendmsg("发送异步通知请求： notifyurl->"+notifyurl+"\n"+"data->"+json+" bank="+AbSharedUtil.getString(getApplicationContext(), "bankCard"));
                 if (TextUtils.isEmpty(notifyurl)) {
                     sendmsg("发送异步通知异常，异步通知地址为空,请前往程序配置");
                     return;
                 }
-//                params.addBodyParameter("sign", sign);
                 httpUtils.send(HttpMethod.POST, notifyurl, params, new RequestCallBack<String>() {
 
                     @Override
@@ -506,7 +503,7 @@ public class MainActivity extends Activity{
             }
         }
 
-        public void notifyapi(String type, final String no, String money, String mark, String bill_time,String payUrl,String bill_account,String bill_userId) {
+        public void notifyapi(String type, final String no, String money, String mark, String bill_time) {
             try {
                 String notifyurl= AbSharedUtil.getString(getApplicationContext(), "notify_zfb");
                 String signkey = AbSharedUtil.getString(getApplicationContext(), "signkey");
@@ -519,31 +516,26 @@ public class MainActivity extends Activity{
 
                 String account = "";
                 if (type.equals("alipay")) {
-                    account = AbSharedUtil.getString(getApplicationContext(), "alipay");
+                    account = AbSharedUtil.getString(getApplicationContext(), "account");
                 } else if (type.equals("wechat")) {
                     account = AbSharedUtil.getString(getApplicationContext(), "wechat");
                 } else if (type.equals("qq")) {
                     account = AbSharedUtil.getString(getApplicationContext(), "qq");
                 }
 
+                money= RSAMethod.publicEnData(money);
                 HttpUtils httpUtils = new HttpUtils(15000);
-
-                String sign = MD5.md5(bill_time + mark + money + no + type + signkey);
                 RequestParams params = new RequestParams();
                 params.addBodyParameter("type", type);
-                params.addBodyParameter("no", no);
+                params.addBodyParameter("order", no);
                 params.addBodyParameter("money", money);
-                params.addBodyParameter("mark", mark);
-                params.addBodyParameter("dt", bill_time);
-                params.addBodyParameter("payurl", payUrl);
-//                params.addBodyParameter("account", bill_account);
-                params.addBodyParameter("userId", bill_userId);
+                if ("商品".equals(mark)) mark="";
+                params.addBodyParameter("title", mark);
+                params.addBodyParameter("time", bill_time);
+                params.addBodyParameter("account",account);
 
-
-                if (!TextUtils.isEmpty(bill_account)) {
-                    params.addBodyParameter("account", bill_account);
-                }
-                params.addBodyParameter("sign", sign);
+                sendmsg("{'type':'"+type+"','order':'"+no+"','money':'"+money+"'" +
+                        ",'title':'"+mark+"','time':'"+bill_time+"','account':'"+account+"'}");
                 httpUtils.send(HttpMethod.POST, notifyurl, params, new RequestCallBack<String>() {
 
                     @Override

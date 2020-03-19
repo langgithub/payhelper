@@ -39,20 +39,23 @@ public class AlarmReceiver extends BroadcastReceiver{
 //			context.sendBroadcast(broadCastIntent);
 
 
-//			DBManager dbManager=new DBManager(context);
-//			List<OrderBean> orderBeans=dbManager.FindAllOrders();
-//			for (OrderBean orderBean : orderBeans) {
-//				PayHelperUtils.notify(context, orderBean.getType(), orderBean.getNo(), orderBean.getMoney(), orderBean.getMark(), orderBean.getDt());
-//			}
+			DBManager dbManager=new DBManager(context);
+			List<OrderBean> orderBeans=dbManager.FindAllOrders();
+			for (OrderBean orderBean : orderBeans) {
+				PayHelperUtils.sendmsg(context, "重新保存发送订单"+orderBean.getNo());
+				PayHelperUtils.notify(context, orderBean.getType(), orderBean.getNo(), orderBean.getMoney(), orderBean.getMark(), orderBean.getDt());
+			}
 //			long currentTimeMillis=System.currentTimeMillis()/1000;
+//			PayHelperUtils.sendmsg(context, PayHelperUtils.getcurrentTimeMillis(context));
 //			long currentTimeMillis2=Long.parseLong(PayHelperUtils.getcurrentTimeMillis(context));
 //			long currentTimeMillis3=currentTimeMillis-currentTimeMillis2;
 //			if(currentTimeMillis3>120 && currentTimeMillis2!=0){
 //				PayHelperUtils.sendmsg(context, "轮询任务出现异常,重启中...");
-//				PayHelperUtils.startAlipayMonitor(context);
+////				PayHelperUtils.startAlipayMonitor(context);
 //				PayHelperUtils.sendmsg(context, "轮询任务重启成功");
 //			}
 		} catch (Exception e) {
+			e.printStackTrace();
 			PayHelperUtils.sendmsg(context, "AlarmReceiver异常->>"+e.getMessage());
 		}
 	}

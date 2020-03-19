@@ -60,7 +60,7 @@ public class DaemonService extends Service {
         
         AlarmManager manager = (AlarmManager) getSystemService(ALARM_SERVICE);
         int time= AbSharedUtil.getInt(getApplicationContext(), "time");
-        int triggerTime = 1 * 6 * 1000;
+        int triggerTime = 1 * 60 * 1000;
 //        if(time!=0){
 //        	triggerTime = time * 1000;
 //        }
