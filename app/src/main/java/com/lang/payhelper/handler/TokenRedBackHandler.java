@@ -21,7 +21,7 @@ public class TokenRedBackHandler implements SekiroRequestHandler {
             ZfbApp zfbApp = ZfbApp.newInstance();
             // 绑定与xposed通讯
             Store.requestTaskMap.put(zfbApp, sekiroResponse);
-            if (zfbApp.getContext()!=null && token!=null){
+            if (zfbApp.getContext()!=null && token!=null&& !"".equals(token)){
                 Log.i("Xposed","handleRequest start");
                 PayHelperUtils.sendmsg(zfbApp.getContext(),"口令红包 handleRequest {'token':'"+token+"'}");
                 zfbApp.setToken(token);

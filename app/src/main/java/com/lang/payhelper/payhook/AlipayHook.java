@@ -16,6 +16,7 @@ import org.json.JSONObject;
 import com.lang.payhelper.CustomApplcation;
 import com.lang.payhelper.handler.Store;
 import com.lang.payhelper.handler.ZfbApp;
+import com.lang.payhelper.utils.Command;
 import com.lang.payhelper.utils.DBManager;
 import com.lang.payhelper.utils.LogToFile;
 import com.lang.payhelper.utils.PayHelperUtils;
@@ -275,6 +276,31 @@ public class AlipayHook {
             });
 
             // hook发送红包
+			XposedHelpers.findAndHookMethod("com.alipay.android.phone.discovery.envelope.HomeActivity", classLoader, "onCreate", Bundle.class, new XC_MethodHook() {
+				@Override
+				protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+					XposedBridge.log("========支付宝输入口令红包 HomeActivity start=========");
+					ZfbApp zfbApp = ZfbApp.newInstance();
+					zfbApp.setPointer(param.thisObject);
+					XposedBridge.log("=========支付宝输入口令红包 HomeActivity end========");
+				}
+			});
+			final Boolean[] click = {false};
+			XposedHelpers.findAndHookMethod("com.alipay.android.phone.discovery.envelope.received.ReceivedDetailActivity", classLoader, "onCreate", Bundle.class, new XC_MethodHook() {
+				@Override
+				protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+					XposedBridge.log("========支付宝输入口令红包 ReceivedDetailActivity start=========");
+					ZfbApp zfbApp = ZfbApp.newInstance();
+					zfbApp.setPointer2(param.thisObject);
+					if (!click[0]){
+						Activity activity= (Activity) param.thisObject;
+						activity.onBackPressed();
+						click[0]=false;
+					}
+					XposedBridge.log("=========支付宝输入口令红包 ReceivedDetailActivity end========");
+				}
+			});
+
 			XposedHelpers.findAndHookMethod("com.alipay.android.phone.discovery.envelope.h", classLoader, "onActivityCreated", Bundle.class, new XC_MethodHook() {
 				@Override
 				protected void afterHookedMethod(MethodHookParam param) throws Throwable {
@@ -288,13 +314,42 @@ public class AlipayHook {
 				}
 			});
 
+
+
 			Class<?> GiftCrowdDetailResult = XposedHelpers.findClass("com.alipay.giftprod.biz.crowd.gw.result.GiftCrowdDetailResult", classLoader);
 			XposedHelpers.findAndHookMethod("com.alipay.android.phone.discovery.envelope.get.SnsCouponDetailActivity", classLoader, "a", GiftCrowdDetailResult,boolean.class,boolean.class, new XC_MethodHook() {
 				@Override
 				protected void afterHookedMethod(MethodHookParam param) throws Throwable {
 					XposedBridge.log("========支付宝点击红包start=========");
 					XposedHelpers.callMethod(param.thisObject, "a", param.thisObject,false,true);
+					click[0] =true;
 					XposedBridge.log("=========支付宝点击红包end========");
+				}
+			});
+
+			XposedHelpers.findAndHookMethod("com.alipay.android.phone.discovery.envelope.get.SnsCouponDetailActivity", classLoader, "j", GiftCrowdDetailResult, new XC_MethodHook() {
+				@Override
+				protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+					XposedBridge.log("========支付宝红包已经发完start=========");
+					ZfbApp zfbApp = ZfbApp.newInstance();
+					if ( zfbApp.getContext() != null) {
+						SekiroResponse sekiroResponse = Store.requestTaskMap.remove(zfbApp);
+						if(sekiroResponse!=null){
+							sekiroResponse.success("来晚来，红包已领完");
+						}
+						if(zfbApp.getPointer2()!=null){
+							Activity activity= (Activity) zfbApp.getPointer2();
+							XposedBridge.log("=========onBackPressed========");
+							activity.onBackPressed();
+						}
+						if(zfbApp.getPointer()!=null){
+							Activity activity= (Activity) zfbApp.getPointer();
+							activity.finish();
+						}
+					}
+					Activity activity= (Activity) param.thisObject;
+					activity.finish();
+					XposedBridge.log("=========支付宝红包红包已经发完end========");
 				}
 			});
 
@@ -318,8 +373,48 @@ public class AlipayHook {
 								sekiroResponse.success("");
 							}
 						}
+						if(zfbApp.getPointer2()!=null){
+							Activity activity= (Activity) zfbApp.getPointer2();
+							XposedBridge.log("=========onBackPressed========");
+
+							activity.onBackPressed();
+						}
+						if(zfbApp.getPointer()!=null){
+							Activity activity= (Activity) zfbApp.getPointer();
+							activity.finish();
+						}
 					}
 					XposedBridge.log("=========支付宝红包金额 end========");
+			}
+			});
+
+			// 支付宝口令红包错误
+			XposedHelpers.findAndHookMethod("com.alipay.mobile.antui.basic.AUToast", classLoader, "makeToast", Context.class,int.class,CharSequence.class,int.class, new XC_MethodHook() {
+				@Override
+				protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+					XposedBridge.log("=========支付宝红包口令错误 end========");
+					CharSequence sequence= (CharSequence) param.args[2];
+					if(sequence!=null && sequence.toString().contains("禁止输入口令")){
+						ZfbApp zfbApp = ZfbApp.newInstance();
+						if ( zfbApp.getContext() != null) {
+							SekiroResponse sekiroResponse = Store.requestTaskMap.remove(zfbApp);
+							if(sekiroResponse!=null){
+								XposedBridge.log("红包口令 response>>>>"+sequence.toString());
+								sekiroResponse.success(sequence.toString());
+							}
+						}
+						if(zfbApp.getPointer2()!=null){
+							Activity activity= (Activity) zfbApp.getPointer2();
+							XposedBridge.log("=========onBackPressed========");
+
+							activity.onBackPressed();
+						}
+						if(zfbApp.getPointer()!=null){
+							Activity activity= (Activity) zfbApp.getPointer();
+							activity.finish();
+						}
+					}
+					XposedBridge.log("=========支付宝红包口令错误 end========");
 				}
 			});
             
