@@ -1,6 +1,11 @@
 package com.lang.payhelper.utils;
 
+import android.annotation.SuppressLint;
+import android.app.AlarmManager;
+import android.app.Application;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -8,6 +13,8 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.Looper;
 import android.util.Log;
+
+import com.lang.payhelper.MainActivity;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -39,6 +46,7 @@ public class CrashHandler implements
 	private static CrashHandler INSTANCE = new CrashHandler();
 	// 程序的Context对象
 	private Context mContext;
+	private Application application;
 	// 用来存储设备信息和异常信�?
 	private Map<String, String> infos = new HashMap<String, String>();
 
@@ -60,7 +68,8 @@ public class CrashHandler implements
 	 * 
 	 * @param context
 	 */
-	public void init(Context context) {
+	public void init(Context context, Application application) {
+		this.application=application;
 		mContext = context;
 		// 获取系统默认的UncaughtException处理�?
 		mDefaultHandler = Thread.getDefaultUncaughtExceptionHandler();
@@ -73,18 +82,26 @@ public class CrashHandler implements
 	 */
 	@Override
 	public void uncaughtException(Thread thread, Throwable ex) {
+		PayHelperUtils.sendmsg(mContext,"payHealper 异常退出，准备重启");
 		if (!handleException(ex) && mDefaultHandler != null) {
 			// 如果用户没有处理则让系统默认的异常处理器来处�?
 			mDefaultHandler.uncaughtException(thread, ex);
 		} else {
+			PayHelperUtils.sendmsg(mContext,"payHealper 异常 杀死当前程序");
 			try {
 				Thread.sleep(3000);
 			} catch (InterruptedException e) {
 				Log.e(TAG, "error : ", e);
 			}
-			// �?出程�?
+			Intent intent = new Intent(mContext, MainActivity.class);
+			@SuppressLint("WrongConstant") PendingIntent restartIntent = PendingIntent.getActivity(
+					application.getApplicationContext(), 0, intent,Intent.FLAG_ACTIVITY_NEW_TASK);
+			//退出程序
+			AlarmManager mgr = (AlarmManager)application.getSystemService(Context.ALARM_SERVICE);
+			mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 1000,restartIntent);
+			// 1秒钟后重启应用
+			//结束进程之前可以把你程序的注销或者退出代码放在这段代码之前
 			android.os.Process.killProcess(android.os.Process.myPid());
-			System.exit(1);
 		}
 	}
 
@@ -96,6 +113,7 @@ public class CrashHandler implements
 	 */
 	@SuppressWarnings("deprecation")
 	private boolean handleException(Throwable ex) {
+		PayHelperUtils.sendmsg(mContext,"payHealper 异常日志收集");
 		if (ex == null) {
 			return false;
 		}
@@ -104,6 +122,7 @@ public class CrashHandler implements
 			@Override
 			public void run() {
 				Looper.prepare();
+				PayHelperUtils.sendmsg(mContext,"payHealper 异常退出，准备重启");
 				Looper.loop();
 			}
 		}.start();
@@ -111,7 +130,7 @@ public class CrashHandler implements
 		collectDeviceInfo(mContext);
 		// 保存日志文件
 		saveCrashInfo2File(ex);
-		android.os.Process.killProcess(android.os.Process.myPid());
+//		android.os.Process.killProcess(android.os.Process.myPid());
 //		System.exit(0);
 		return true;
 	}

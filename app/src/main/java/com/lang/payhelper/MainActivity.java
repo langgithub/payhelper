@@ -254,6 +254,12 @@ public class MainActivity<onF> extends Activity{
     }
 
     @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        // 异常恢复
+        super.onRestoreInstanceState(savedInstanceState);
+    }
+
+    @Override
     public void finish() {
         sendmsg("activity finish");
         super.finish();
