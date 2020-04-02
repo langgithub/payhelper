@@ -25,7 +25,7 @@ public class CustomApplcation extends Application {
         // 崩溃记录
         context = getApplicationContext();
         CrashHandler crashHandler = CrashHandler.getInstance();
-        crashHandler.init(context);
+        crashHandler.init(context,this);
         LogUtils.init(context, true, false);
         mInstance = this;
     }
