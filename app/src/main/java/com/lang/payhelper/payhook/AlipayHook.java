@@ -3,7 +3,9 @@ package com.lang.payhelper.payhook;
 
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
@@ -13,11 +15,13 @@ import java.util.regex.Pattern;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.alibaba.fastjson.JSON;
 import com.lang.payhelper.CustomApplcation;
 import com.lang.payhelper.handler.Store;
 import com.lang.payhelper.handler.ZfbApp;
 import com.lang.payhelper.utils.Command;
 import com.lang.payhelper.utils.DBManager;
+import com.lang.payhelper.utils.JsonHelper;
 import com.lang.payhelper.utils.LogToFile;
 import com.lang.payhelper.utils.PayHelperUtils;
 import com.lang.payhelper.utils.StringUtils;
@@ -26,6 +30,7 @@ import com.lang.sekiro.api.SekiroResponse;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.widget.Button;
 
@@ -70,6 +75,7 @@ public class AlipayHook {
 
     public void hook(final ClassLoader classLoader,final Context context) {
         securityCheckHook(classLoader);
+		preventUpgrade(context);
         try {
 			final Object[] obj = {null};
 			// 收款二维码抓取
@@ -136,7 +142,29 @@ public class AlipayHook {
             			String MessageInfo = (String) XposedHelpers.callMethod(object, "toString");
             			XposedBridge.log(MessageInfo);
 						String content= StringUtils.getTextCenter(MessageInfo, "content='", "'");
-            			if(content.contains("二维码收款") || content.contains("收到一笔转账") || content.contains("付款成功")){
+						if (!content.contains("二维码收款")) {
+							if (!content.contains("收到一笔转账")) {
+								if (content.contains("花呗")) {
+									String midText2 = StringUtils.getTextCenter(MessageInfo, "link='", "'");
+									Uri uri = Uri.parse(midText2);
+									JSONObject jsonObject = new JSONObject(JSON.toJSONString(object));
+									String dt = jsonObject.getString("gmtCreate");
+									String str = midText2;
+									String receiveAmount = new JSONObject(jsonObject.getString("content")).getString("content").replace("￥", "");
+									String crowdNo = uri.getQueryParameter("tradeNO");
+									XposedBridge.log("获取到的花呗订单号 》》》》" + crowdNo);
+									AlipayHook.getHBDetail(crowdNo, dt, receiveAmount, context, classLoader);
+									Intent intent = cookieBroadCastIntent;
+									String str2 = alipaycookie;
+								} else {
+									Intent intent2 = cookieBroadCastIntent;
+									String str3 = alipaycookie;
+								}
+								XposedBridge.log("======支付宝个人账号订单end=========");
+								super.beforeHookedMethod(param);
+							}
+						}
+						if(content.contains("二维码收款") || content.contains("收到一笔转账") || content.contains("付款成功")){
             				JSONObject jsonObject=new JSONObject(content);
 							XposedBridge.log(jsonObject.toString());
 
@@ -547,4 +575,76 @@ public class AlipayHook {
             e.printStackTrace();
         }
     }
+
+	public static void getHBDetail(String tradeNo, String dt, String amount, Context context, ClassLoader mClassLoader) {
+		final ClassLoader classLoader = mClassLoader;
+		final String str = tradeNo;
+		final Context context2 = context;
+		final String str2 = dt;
+		final String str3 = amount;
+		new Thread(new Runnable() {
+			public void run() {
+				try {
+					Class clazz = XposedHelpers.findClass("com.alipay.mobile.h5container.api.H5Page", classLoader);
+					C0540h5 _h = new C0540h5();
+					Object objfunc3 = Proxy.newProxyInstance(classLoader, new Class[]{clazz}, _h);
+					Class clazzz = XposedHelpers.findClass("com.alipay.mobile.nebulabiz.rpc.H5RpcUtil", classLoader);
+					Object obj = XposedHelpers.callStaticMethod(clazzz, "rpcCall", new Object[]{"alipay.mobile.bill.QuerySingleBillDetailForH5", "[{\"bizType\":\"PCC?tagid\",\"tradeNo\":\"" + str + "\"}]", "", true, XposedHelpers.findClass("com.alibaba.fastjson.JSONObject", classLoader).newInstance(), "", false, objfunc3, 0, "", false, -1});
+					String result = JsonHelper.toJson(obj);
+					JSONObject data = new JSONObject(new JSONObject(result).getString("response")).optJSONArray("fields").getJSONObject(3);
+					XposedBridge.log("花呗data》》》" + data);
+					JSONObject value = new JSONObject(data.optString("value"));
+					XposedBridge.log("花呗value》》》" + value);
+					JSONObject v_data = value.optJSONArray("data").getJSONObject(0);
+					XposedBridge.log("花呗v_data》》》" + v_data);
+					String url = v_data.getString("goto");
+					XposedBridge.log("获取到的花呗支付url 》》》》》" + url);
+					String remark = Uri.parse(url).getQueryParameter("invitationId");
+					Object obj2 = obj;
+					if (result.contains("有退款")) {
+						Context context = context2;
+						Class cls = clazz;
+						StringBuilder sb = new StringBuilder();
+						C0540h5 h5Var = _h;
+						sb.append("订单号");
+						sb.append(str);
+						sb.append("数据不奏效请留意");
+						PayHelperUtils.sendmsg(context, sb.toString());
+						return;
+					}
+					C0540h5 h5Var2 = _h;
+					Intent intent = new Intent();
+					intent.setAction(AlipayHook.BILLRECEIVED_ACTION);
+					intent.putExtra("bill_time", PayHelperUtils.stampToDate(str2));
+					intent.putExtra("bill_no", str);
+					intent.putExtra("bill_money", str3);
+					intent.putExtra("bill_type", "huabei");
+					intent.putExtra("bill_mark", remark);
+					XposedBridge.log("花呗，获取到的订单详情 支付时间：" + str2 + "\n订单号：" + str);
+					context2.sendBroadcast(intent);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}).start();
+	}
+	public static void preventUpgrade(Context context) {
+		XposedHelpers.findAndHookMethod("com.alipay.android.launcher.AlipayUpgradeHelper", context.getClassLoader(), "isUpgrade", new Object[]{new XC_MethodReplacement() {
+			/* access modifiers changed from: protected */
+			public Object replaceHookedMethod(XC_MethodHook.MethodHookParam methodHookParam) throws Throwable {
+				return false;
+			}
+		}});
+	}
+
+	/* renamed from: com.tools.payhelper.AlipayHook$h5 */
+	static class C0540h5 implements InvocationHandler {
+		C0540h5() {
+		}
+
+		public Object invoke(Object o, Method method, Object[] objects) throws Throwable {
+			String name = method.getName();
+			return null;
+		}
+	}
 }
