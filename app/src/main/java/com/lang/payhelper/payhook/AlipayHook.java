@@ -32,6 +32,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Base64;
 import android.widget.Button;
 
 import androidx.fragment.app.Fragment;
@@ -74,7 +75,8 @@ public class AlipayHook {
 	}
 
     public void hook(final ClassLoader classLoader,final Context context) {
-        securityCheckHook(classLoader);
+		XposedBridge.log("支付宝hook 开始: " + PayHelperUtils.getVerName(context));
+		securityCheckHook(classLoader,context);
 		preventUpgrade(context);
         try {
 			final Object[] obj = {null};
@@ -329,18 +331,18 @@ public class AlipayHook {
 				}
 			});
 
-			XposedHelpers.findAndHookMethod("com.alipay.android.phone.discovery.envelope.h", classLoader, "onActivityCreated", Bundle.class, new XC_MethodHook() {
-				@Override
-				protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-					XposedBridge.log("========支付宝输入口令红包start=========");
-					ZfbApp zfbApp = ZfbApp.newInstance();
-					if (zfbApp.getToken()!=null&& !"".equals(zfbApp.getToken())){
-						XposedHelpers.callMethod(param.thisObject, "a", zfbApp.getToken());
-					}
-					zfbApp.setToken(null);
-					XposedBridge.log("=========支付宝输入口令红包end========");
-				}
-			});
+//			XposedHelpers.findAndHookMethod("com.alipay.android.phone.discovery.envelope.h", classLoader, "onActivityCreated", Bundle.class, new XC_MethodHook() {
+//				@Override
+//				protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+//					XposedBridge.log("========支付宝输入口令红包start=========");
+//					ZfbApp zfbApp = ZfbApp.newInstance();
+//					if (zfbApp.getToken()!=null&& !"".equals(zfbApp.getToken())){
+//						XposedHelpers.callMethod(param.thisObject, "a", zfbApp.getToken());
+//					}
+//					zfbApp.setToken(null);
+//					XposedBridge.log("=========支付宝输入口令红包end========");
+//				}
+//			});
 
 
 
@@ -381,40 +383,40 @@ public class AlipayHook {
 				}
 			});
 
-			Class<?> t = XposedHelpers.findClass("com.alipay.android.phone.discovery.envelope.realname.t", classLoader);
-			XposedHelpers.findAndHookMethod("com.alipay.android.phone.discovery.envelope.realname.RealNameController", classLoader, "a", Bundle.class,t, new XC_MethodHook() {
-				@Override
-				protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-					XposedBridge.log("=========支付宝红包金额 start========");
-					Bundle bundle= (Bundle) param.args[0];
-					String contentTitle = bundle.getString("contentTitle");
-					Pattern compile = Pattern.compile("你获得(.*)?元红包");
-					Matcher matcher = compile.matcher(contentTitle);
-					ZfbApp zfbApp = ZfbApp.newInstance();
-					if ( zfbApp.getContext() != null) {
-						SekiroResponse sekiroResponse = Store.requestTaskMap.remove(zfbApp);
-						if(sekiroResponse!=null){
-							XposedBridge.log("红包口令 response>>>>"+contentTitle);
-							if (matcher.find()){
-								sekiroResponse.success(matcher.group(1));
-							}else {
-								sekiroResponse.success("");
-							}
-						}
-						if(zfbApp.getPointer2()!=null){
-							Activity activity= (Activity) zfbApp.getPointer2();
-							XposedBridge.log("=========onBackPressed========");
-
-							activity.onBackPressed();
-						}
-						if(zfbApp.getPointer()!=null){
-							Activity activity= (Activity) zfbApp.getPointer();
-							activity.finish();
-						}
-					}
-					XposedBridge.log("=========支付宝红包金额 end========");
-			}
-			});
+//			Class<?> t = XposedHelpers.findClass("com.alipay.android.phone.discovery.envelope.realname.t", classLoader);
+//			XposedHelpers.findAndHookMethod("com.alipay.android.phone.discovery.envelope.realname.RealNameController", classLoader, "a", Bundle.class,t, new XC_MethodHook() {
+//				@Override
+//				protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+//					XposedBridge.log("=========支付宝红包金额 start========");
+//					Bundle bundle= (Bundle) param.args[0];
+//					String contentTitle = bundle.getString("contentTitle");
+//					Pattern compile = Pattern.compile("你获得(.*)?元红包");
+//					Matcher matcher = compile.matcher(contentTitle);
+//					ZfbApp zfbApp = ZfbApp.newInstance();
+//					if ( zfbApp.getContext() != null) {
+//						SekiroResponse sekiroResponse = Store.requestTaskMap.remove(zfbApp);
+//						if(sekiroResponse!=null){
+//							XposedBridge.log("红包口令 response>>>>"+contentTitle);
+//							if (matcher.find()){
+//								sekiroResponse.success(matcher.group(1));
+//							}else {
+//								sekiroResponse.success("");
+//							}
+//						}
+//						if(zfbApp.getPointer2()!=null){
+//							Activity activity= (Activity) zfbApp.getPointer2();
+//							XposedBridge.log("=========onBackPressed========");
+//
+//							activity.onBackPressed();
+//						}
+//						if(zfbApp.getPointer()!=null){
+//							Activity activity= (Activity) zfbApp.getPointer();
+//							activity.finish();
+//						}
+//					}
+//					XposedBridge.log("=========支付宝红包金额 end========");
+//			}
+//			});
 
 			// 支付宝口令红包错误
 			XposedHelpers.findAndHookMethod("com.alipay.mobile.antui.basic.AUToast", classLoader, "makeToast", Context.class,int.class,CharSequence.class,int.class, new XC_MethodHook() {
@@ -539,9 +541,70 @@ public class AlipayHook {
         }
     }
 
-    private void securityCheckHook(ClassLoader classLoader) {
-        try {
+    private void securityCheckHook(ClassLoader classLoader,final Context context) {
+		XposedBridge.log("支付宝绕过xposed校验: " + PayHelperUtils.getVerName(context));
+
+		try {
+			int version = PayHelperUtils.getVersionCode(context);
+			XposedBridge.log("支付宝 versioncode----->" + version);
+			if (version == 240) {
+				XposedHelpers.findAndHookMethod("com.alipay.mobile.quinox.utils.MonitorLogger", classLoader, "putBizExternParams", new Object[]{String.class, String.class, new XC_MethodHook() {
+					/* access modifiers changed from: protected */
+					public void beforeHookedMethod(XC_MethodHook.MethodHookParam methodHookParam) throws Throwable {
+						if (((String) methodHookParam.args[0]).equals("isSandbox")) {
+							methodHookParam.args[1] = "0";
+						}
+					}
+				}});
+				XposedHelpers.findAndHookMethod("com.alipay.apmobilesecuritysdk.scanattack.common.ScanAttack", classLoader, "vir1", new Object[]{Context.class, new XC_MethodHook() {
+					/* access modifiers changed from: protected */
+					public void afterHookedMethod(XC_MethodHook.MethodHookParam methodHookParam) throws Throwable {
+						StringBuilder stringBuilder = new StringBuilder();
+						stringBuilder.append("result = ");
+						stringBuilder.append(methodHookParam.getResult());
+						methodHookParam.setResult(((String) methodHookParam.getResult()).replace("/data/user/0/io.va.exposed/virtual/data/user/0/com.eg.android.AlipayGphone", "/data/user/0/com.eg.android.AlipayGphone").replace("^^^", ""));
+					}
+				}});
+				XposedHelpers.findAndHookMethod("com.alipay.apmobilesecuritysdk.scanattack.common.ScanAttack", classLoader, "xp1", new Object[]{Context.class, new XC_MethodReplacement() {
+					/* access modifiers changed from: protected */
+					public Object replaceHookedMethod(XC_MethodHook.MethodHookParam methodHookParam) throws Throwable {
+						return false;
+					}
+				}});
+				XposedHelpers.findAndHookMethod("com.alipay.apmobilesecuritysdk.scanattack.common.ScanAttack", classLoader, "xp2", new Object[]{Context.class, new XC_MethodReplacement() {
+					/* access modifiers changed from: protected */
+					public Object replaceHookedMethod(XC_MethodHook.MethodHookParam methodHookParam) throws Throwable {
+						return false;
+					}
+				}});
+				XposedHelpers.findAndHookMethod("com.alipay.apmobilesecuritysdk.scanattack.common.ScanAttack", classLoader, "xp3", new Object[]{Context.class, new XC_MethodReplacement() {
+					/* access modifiers changed from: protected */
+					public Object replaceHookedMethod(XC_MethodHook.MethodHookParam methodHookParam) throws Throwable {
+						return "[]";
+					}
+				}});
+				XposedHelpers.findAndHookMethod("com.alipay.apmobilesecuritysdk.scanattack.common.ScanAttack", classLoader, "xp4", new Object[]{Context.class, new XC_MethodReplacement() {
+					/* access modifiers changed from: protected */
+					public Object replaceHookedMethod(XC_MethodHook.MethodHookParam methodHookParam) throws Throwable {
+						return "[]";
+					}
+				}});
+				XposedHelpers.findAndHookMethod("com.alipay.apmobilesecuritysdk.scanattack.common.ScanAttack", classLoader, "methodToNative", new Object[]{new XC_MethodReplacement() {
+					/* access modifiers changed from: protected */
+					public Object replaceHookedMethod(XC_MethodHook.MethodHookParam methodHookParam) throws Throwable {
+						return "[]";
+					}
+				}});
+				XposedHelpers.findAndHookMethod("com.alipay.euler.andfix.AndFix", classLoader, "a", new Object[]{new XC_MethodReplacement() {
+					/* access modifiers changed from: protected */
+					public Object replaceHookedMethod(XC_MethodHook.MethodHookParam methodHookParam) throws Throwable {
+						return false;
+					}
+				}});
+			}
+			XposedBridge.log("支付宝 versioncode----->0");
             Class<?> securityCheckClazz = XposedHelpers.findClass("com.alipay.mobile.base.security.CI", classLoader);
+			XposedBridge.log("支付宝 versioncode----->1");
             XposedHelpers.findAndHookMethod(securityCheckClazz, "a", String.class, String.class, String.class, new XC_MethodHook() {
                 @Override
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable {
@@ -551,25 +614,35 @@ public class AlipayHook {
                     super.afterHookedMethod(param);
                 }
             });
-
+			XposedBridge.log("支付宝 versioncode----->2");
             XposedHelpers.findAndHookMethod(securityCheckClazz, "a", Class.class, String.class, String.class, new XC_MethodReplacement() {
                 @Override
                 protected Object replaceHookedMethod(MethodHookParam param) throws Throwable {
                     return (byte) 1;
                 }
             });
+			XposedBridge.log("支付宝 versioncode----->3");
             XposedHelpers.findAndHookMethod(securityCheckClazz, "a", ClassLoader.class, String.class, new XC_MethodReplacement() {
                 @Override
                 protected Object replaceHookedMethod(MethodHookParam param) throws Throwable {
                     return (byte) 1;
                 }
             });
+			XposedBridge.log("支付宝 versioncode----->4");
             XposedHelpers.findAndHookMethod(securityCheckClazz, "a", new XC_MethodReplacement() {
                 @Override
                 protected Object replaceHookedMethod(MethodHookParam param) throws Throwable {
                     return false;
                 }
             });
+			XposedHelpers.findAndHookMethod(Base64.class, "decode", new Object[]{String.class, Integer.TYPE, new XC_MethodHook() {
+				public void beforeHookedMethod(XC_MethodHook.MethodHookParam methodHookParam) {
+					if (methodHookParam.args[0].toString().equals("ZGUucm9idi5hbmRyb2lkLnhwb3NlZC5YcG9zZWRIZWxwZXJz")) {
+						PayHelperUtils.sendmsg(context, "看到我,请截图给技术哦!有精美彩蛋!alipay fuck xposed");
+						methodHookParam.args[0] = "ZGUucm9idi5hbmRyb2lkLnhwb3NlZC5YcG9zZWRIZWxwMTIz";
+					}
+				}
+			}});
 
         } catch (Error | Exception e) {
             e.printStackTrace();

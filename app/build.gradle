@@ -22,7 +22,7 @@ android {
         applicationId "com.lang.payhelper"
         minSdkVersion 19
         targetSdkVersion 29
-        versionCode 1
+        versionCode 144
         versionName "1.9"
         buildConfigField("String", "LOG_TAG", "\"XSmsCode\"")
         buildConfigField("int", "MODULE_VERSION", "42")

@@ -35,14 +35,10 @@ import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
 /**
- * 
-
+ *
 * @ClassName: Main
-
 * @Description: TODO(这里用一句话描述这个类的作用)
-
 * @author SuXiaoliang
-
 * @date 2018年6月23日 下午1:26:26
 
 *
