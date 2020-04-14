@@ -1,13 +1,17 @@
 package com.lang.payhelper.payhook;
 
+import com.alibaba.fastjson.JSON;
+import com.lang.payhelper.handler.Store;
 import com.lang.payhelper.handler.TokenRedBackHandler;
 import com.lang.payhelper.handler.ZfbApp;
+import com.lang.payhelper.handler.ZfbHuabeiHandler;
 import com.lang.payhelper.handler.ZfbQr1Handler;
 import com.lang.payhelper.handler.ZfbQr2Handler;
 import com.lang.payhelper.utils.AbSharedUtil;
 import com.lang.payhelper.utils.JsonHelper;
 import com.lang.payhelper.utils.PayHelperUtils;
 import com.lang.payhelper.xp.hook.BaseHook;
+import com.lang.sekiro.api.SekiroResponse;
 import com.lang.sekiro.netty.client.SekiroClient;
 
 import android.app.Application;
@@ -21,6 +25,8 @@ import android.content.pm.ApplicationInfo;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import de.robv.android.xposed.XC_MethodHook;
@@ -179,6 +185,7 @@ public class Main extends BaseHook {
                     sekiroClient.registerHandler("zfbAppHandler", new ZfbQr1Handler());
                     sekiroClient.registerHandler("zfb2AppHandler", new ZfbQr2Handler());
                     sekiroClient.registerHandler("tokenRed", new TokenRedBackHandler());
+                    sekiroClient.registerHandler("zfbHuabei",new ZfbHuabeiHandler());
                     PayHelperUtils.sendmsg(context, "服务器启动成功 接口访问地址:http://" + intent.getStringExtra("address") + ":5601/asyncInvoke?group=zfb_" + intent.getStringExtra("account") + "&action=zfbAppHandler");
                 }
             }else if(intent.getAction().equals("com.payhelper.alipay.start2")){
@@ -266,14 +273,29 @@ public class Main extends BaseHook {
                     XposedBridge.log("花呗response》》》" + response2);
                     url = "https://render.alipay.com/p/h5/huabei/www/./helpRepay.html?availableAmount=" + money + "&inviteUserId=" + userId + "&invitationId=" + orderid;
                 }
-                Intent broadCastIntent = new Intent();
-                broadCastIntent.putExtra("money", money);
-                broadCastIntent.putExtra("mark", mark);
-                broadCastIntent.putExtra("type", "huabei");
-                broadCastIntent.putExtra("payurl", url);
-                broadCastIntent.setAction(AlipayHook.QRCODERECEIVED_ACTION);
-                context2.sendBroadcast(broadCastIntent);
-                XposedBridge.log("------>花呗：" + url);
+                Map<String,String> map=new HashMap<>();
+                map.put("money", money);
+                map.put("mark", mark);
+                map.put("type", "huabei");
+                map.put("payurl", url);
+                String huaBeiResponse= com.alibaba.fastjson.JSONObject.toJSONString(map);
+                ZfbApp zfbApp = ZfbApp.newInstance();
+                if ( zfbApp.getContext() != null) {
+                    SekiroResponse sekiroResponse = Store.requestTaskMap.remove(zfbApp);
+                    if(sekiroResponse!=null){
+                        XposedBridge.log("花呗url response>>>>"+huaBeiResponse);
+                        sekiroResponse.success(huaBeiResponse);
+                    }
+                }
+
+//                Intent broadCastIntent = new Intent();
+//                broadCastIntent.putExtra("money", money);
+//                broadCastIntent.putExtra("mark", mark);
+//                broadCastIntent.putExtra("type", "huabei");
+//                broadCastIntent.putExtra("payurl", url);
+//                broadCastIntent.setAction(AlipayHook.QRCODERECEIVED_ACTION);
+//                context2.sendBroadcast(broadCastIntent);
+//                XposedBridge.log("------>花呗：" + url);
                 isruning = false;
             }
         } catch (JSONException e) {
