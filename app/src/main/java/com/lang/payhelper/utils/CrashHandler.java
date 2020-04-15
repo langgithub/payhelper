@@ -118,14 +118,14 @@ public class CrashHandler implements
 			return false;
 		}
 		// 使用Toast来显示异常信�?
-		new Thread() {
-			@Override
-			public void run() {
-				Looper.prepare();
-				PayHelperUtils.sendmsg(mContext,"payHealper 异常退出，准备重启");
-				Looper.loop();
-			}
-		}.start();
+//		new Thread() {
+//			@Override
+//			public void run() {
+//				Looper.prepare();
+//				PayHelperUtils.sendmsg(mContext,"payHealper 异常退出，准备重启");
+//				Looper.loop();
+//			}
+//		}.start();
 		// 收集设备参数信息
 		collectDeviceInfo(mContext);
 		// 保存日志文件

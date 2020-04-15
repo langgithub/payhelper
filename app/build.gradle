@@ -23,7 +23,7 @@ android {
         minSdkVersion 19
         targetSdkVersion 29
         versionCode 144
-        versionName "1.9"
+        versionName "1.9.2"
         buildConfigField("String", "LOG_TAG", "\"XSmsCode\"")
         buildConfigField("int", "MODULE_VERSION", "42")
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -97,9 +97,6 @@ android {
         exclude 'META-INF/io.netty.versions.properties'
     }
 }
-
-
-
 
 ext {
     butterKnifeVersion = "10.1.0" // butter knife
