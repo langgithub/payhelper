@@ -144,7 +144,13 @@ public class MainActivity<onF> extends Activity{
         IntentFilter alarmIntentFilter = new IntentFilter();
         alarmIntentFilter.addAction(NOTIFY_ACTION);
         registerReceiver(alarmReceiver, alarmIntentFilter);
-        startService(new Intent(this, DaemonService.class));
+        Intent intentService = new Intent(this, DaemonService.class);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            startForegroundService(intentService);
+        } else {
+            startService(intentService);
+        }
+//        startService();
 
 
 //        sendmsg("content:" + getApplicationContext().getPackageName());
@@ -251,6 +257,12 @@ public class MainActivity<onF> extends Activity{
         unregisterReceiver(alarmReceiver);
         sendmsg("activity onDestroy");
         super.onDestroy();
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        // 异常恢复
+        super.onRestoreInstanceState(savedInstanceState);
     }
 
     @Override

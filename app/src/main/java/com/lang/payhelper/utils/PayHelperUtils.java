@@ -516,6 +516,17 @@ public class PayHelperUtils {
 			}
 		});
 	}
+
+	public static String getAlipayserId(ClassLoader classLoader) {
+		try {
+			Class<?> AlipayApplication = XposedHelpers.findClass("com.alipay.mobile.framework.AlipayApplication", classLoader);
+			Class<?> SocialSdkContactService = XposedHelpers.findClass("com.alipay.mobile.personalbase.service.SocialSdkContactService", classLoader);
+			return XposedHelpers.getObjectField(XposedHelpers.callMethod(XposedHelpers.callMethod(XposedHelpers.callMethod(XposedHelpers.callStaticMethod(AlipayApplication, "getInstance", new Object[0]), "getMicroApplicationContext", new Object[0]), "findServiceByInterface", new Object[]{SocialSdkContactService.getName()}), "getMyAccountInfoModelByLocal", new Object[0]), "userId").toString();
+		} catch (Exception e) {
+			return "";
+		}
+	}
+
 	public static void getTradeInfoFromPC(final Context context,final String cookie,String alipayUserId) {
 		long l = System.currentTimeMillis();
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
