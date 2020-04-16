@@ -468,8 +468,11 @@ public class AlipayHook {
 					}
 				}
 			});
+
         } catch (Error | Exception e) {
-            e.printStackTrace();
+			//此处必须这样包含Error 重点 XposedHelpers.findClass("com.alipay.mobile.base.security.CI" 后就出现异常了
+			XposedBridge.log(e);
+			PayHelperUtils.sendmsg(context, e.getMessage());
         }
     }
 
