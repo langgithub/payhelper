@@ -184,6 +184,79 @@ public class AlipayHook {
             	}
             });
 
+			/********************************hook获得二维码url 带金额和备注****************************************/
+			XposedHelpers.findAndHookMethod("com.alipay.mobile.payee.ui.PayeeQRSetMoneyActivity", classLoader, "a",
+					XposedHelpers.findClass("com.alipay.transferprod.rpc.result.ConsultSetAmountRes", classLoader), new XC_MethodHook() {
+						@Override
+						protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+							XposedBridge.log("=========支付宝生成完成start========");
+
+							Field moneyField = XposedHelpers.findField(param.thisObject.getClass(), "g");
+							String money = (String) moneyField.get(param.thisObject);
+
+							Field markField = XposedHelpers.findField(param.thisObject.getClass(), "c");
+							Object markObject = markField.get(param.thisObject);
+							String mark = (String) XposedHelpers.callMethod(markObject, "getUbbStr");
+
+							Object consultSetAmountRes = param.args[0];
+							Field consultField = XposedHelpers.findField(consultSetAmountRes.getClass(), "qrCodeUrl");
+							String payurl = (String) consultField.get(consultSetAmountRes);
+							XposedBridge.log(money + "  " + mark + "  " + payurl);
+
+							if (money != null) {
+								XposedBridge.log("调用增加数据方法==>支付宝");
+								Intent broadCastIntent = new Intent();
+								broadCastIntent.putExtra("money", money);
+								broadCastIntent.putExtra("mark", mark);
+								broadCastIntent.putExtra("type", "alipay");
+								broadCastIntent.putExtra("payurl", payurl);
+								setQrCodeUrl(payurl);
+								broadCastIntent.setAction(QRCODERECEIVED_ACTION);
+								context.sendBroadcast(broadCastIntent);
+
+								ZfbApp zfbApp = ZfbApp.newInstance();
+								if ( zfbApp.getContext() != null) {
+									SekiroResponse sekiroResponse = Store.requestTaskMap.remove(zfbApp);
+									if(sekiroResponse!=null){
+										XposedBridge.log("return  sekiroResponse>>>>");
+										sekiroResponse.success(getQrCodeUrl());
+									}
+								}
+							}
+
+							XposedBridge.log("=========支付宝生成完成end========");
+						}
+					});
+
+			//hook设置金额和备注的onCreate方法，自动填写数据并点击
+			XposedHelpers.findAndHookMethod("com.alipay.mobile.payee.ui.PayeeQRSetMoneyActivity", classLoader, "onCreate", Bundle.class, new XC_MethodHook() {
+				@Override
+				protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+					XposedBridge.log("========支付宝设置金额start=========");
+					Intent cookieBroadCastIntent = new Intent();
+					String alipaycookie=PayHelperUtils.getCookieStr(classLoader);
+					cookieBroadCastIntent.putExtra("alipaycookie", alipaycookie);
+					cookieBroadCastIntent.setAction(SAVEALIPAYCOOKIE_ACTION);
+					context.sendBroadcast(cookieBroadCastIntent);
+
+					Field jinErField = XposedHelpers.findField(param.thisObject.getClass(), "b");
+					final Object jinErView = jinErField.get(param.thisObject);
+					Field beiZhuField = XposedHelpers.findField(param.thisObject.getClass(), "c");
+					final Object beiZhuView = beiZhuField.get(param.thisObject);
+					Intent intent = ((Activity) param.thisObject).getIntent();
+					String mark=intent.getStringExtra("mark");
+					String money=intent.getStringExtra("money");
+					//设置支付宝金额和备注
+					XposedHelpers.callMethod(jinErView, "setText", money);
+					XposedHelpers.callMethod(beiZhuView, "setText", mark);
+					//点击确认
+					Field quRenField = XposedHelpers.findField(param.thisObject.getClass(), "e");
+					final Button quRenButton = (Button) quRenField.get(param.thisObject);
+					quRenButton.performClick();
+					XposedBridge.log("=========支付宝设置金额end========");
+				}
+			});
+
 			/********************************收款二维码抓取 不带金额备注的****************************************/
 			final Object[] obj = {null};
 			XposedHelpers.findAndHookMethod("com.alipay.transferprod.rpc.req.CreateSessionReq", classLoader, "toString", new XC_MethodHook() {
@@ -234,80 +307,6 @@ public class AlipayHook {
 				@Override
 				protected void afterHookedMethod(MethodHookParam param) throws Throwable {
 					obj[0] =param.thisObject;
-				}
-			});
-
-
-			/********************************hook获得二维码url 带金额和备注****************************************/
-			XposedHelpers.findAndHookMethod("com.alipay.mobile.payee.ui.PayeeQRSetMoneyActivity", classLoader, "a",
-            		XposedHelpers.findClass("com.alipay.transferprod.rpc.result.ConsultSetAmountRes", classLoader), new XC_MethodHook() {
-                @Override
-                protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                	XposedBridge.log("=========支付宝生成完成start========");
-
-					Field moneyField = XposedHelpers.findField(param.thisObject.getClass(), "g");
-					String money = (String) moneyField.get(param.thisObject);
-
-					Field markField = XposedHelpers.findField(param.thisObject.getClass(), "c");
-					Object markObject = markField.get(param.thisObject);
-					String mark = (String) XposedHelpers.callMethod(markObject, "getUbbStr");
-
-					Object consultSetAmountRes = param.args[0];
-					Field consultField = XposedHelpers.findField(consultSetAmountRes.getClass(), "qrCodeUrl");
-					String payurl = (String) consultField.get(consultSetAmountRes);
-					XposedBridge.log(money + "  " + mark + "  " + payurl);
-
-					if (money != null) {
-						XposedBridge.log("调用增加数据方法==>支付宝");
-						Intent broadCastIntent = new Intent();
-						broadCastIntent.putExtra("money", money);
-						broadCastIntent.putExtra("mark", mark);
-						broadCastIntent.putExtra("type", "alipay");
-						broadCastIntent.putExtra("payurl", payurl);
-						setQrCodeUrl(payurl);
-						broadCastIntent.setAction(QRCODERECEIVED_ACTION);
-						context.sendBroadcast(broadCastIntent);
-
-						ZfbApp zfbApp = ZfbApp.newInstance();
-						if ( zfbApp.getContext() != null) {
-							SekiroResponse sekiroResponse = Store.requestTaskMap.remove(zfbApp);
-							if(sekiroResponse!=null){
-								XposedBridge.log("return  sekiroResponse>>>>");
-								sekiroResponse.success(getQrCodeUrl());
-							}
-						}
-					}
-
-					XposedBridge.log("=========支付宝生成完成end========");
-                }
-            });
-
-			//hook设置金额和备注的onCreate方法，自动填写数据并点击
-			XposedHelpers.findAndHookMethod("com.alipay.mobile.payee.ui.PayeeQRSetMoneyActivity", classLoader, "onCreate", Bundle.class, new XC_MethodHook() {
-				@Override
-				protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-					XposedBridge.log("========支付宝设置金额start=========");
-					Intent cookieBroadCastIntent = new Intent();
-					String alipaycookie=PayHelperUtils.getCookieStr(classLoader);
-					cookieBroadCastIntent.putExtra("alipaycookie", alipaycookie);
-					cookieBroadCastIntent.setAction(SAVEALIPAYCOOKIE_ACTION);
-					context.sendBroadcast(cookieBroadCastIntent);
-
-					Field jinErField = XposedHelpers.findField(param.thisObject.getClass(), "b");
-					final Object jinErView = jinErField.get(param.thisObject);
-					Field beiZhuField = XposedHelpers.findField(param.thisObject.getClass(), "c");
-					final Object beiZhuView = beiZhuField.get(param.thisObject);
-					Intent intent = ((Activity) param.thisObject).getIntent();
-					String mark=intent.getStringExtra("mark");
-					String money=intent.getStringExtra("money");
-					//设置支付宝金额和备注
-					XposedHelpers.callMethod(jinErView, "setText", money);
-					XposedHelpers.callMethod(beiZhuView, "setText", mark);
-					//点击确认
-					Field quRenField = XposedHelpers.findField(param.thisObject.getClass(), "e");
-					final Button quRenButton = (Button) quRenField.get(param.thisObject);
-					quRenButton.performClick();
-					XposedBridge.log("=========支付宝设置金额end========");
 				}
 			});
 
@@ -426,16 +425,6 @@ public class AlipayHook {
 				});
 			}
 
-			// 用于检查是否绕过Xposed
-			XposedHelpers.findAndHookMethod(Base64.class, "decode", String.class, Integer.TYPE, new XC_MethodHook() {
-				public void beforeHookedMethod(MethodHookParam methodHookParam) {
-					if (methodHookParam.args[0].toString().equals("ZGUucm9idi5hbmRyb2lkLnhwb3NlZC5YcG9zZWRIZWxwZXJz")) {
-						PayHelperUtils.sendmsg(context, "看到我,请截图给技术哦!有精美彩蛋!alipay fuck xposed");
-						methodHookParam.args[0] = "ZGUucm9idi5hbmRyb2lkLnhwb3NlZC5YcG9zZWRIZWxwMTIz";
-					}
-				}
-			});
-
 			XposedBridge.log("支付宝绕过Xp校验");
             Class<?> securityCheckClazz = XposedHelpers.findClass("com.alipay.mobile.base.security.CI", classLoader);
             XposedHelpers.findAndHookMethod(securityCheckClazz, "a", String.class, String.class, String.class, new XC_MethodHook() {
@@ -465,6 +454,15 @@ public class AlipayHook {
                     return false;
                 }
             });
+			// 用于检查是否绕过Xposed
+			XposedHelpers.findAndHookMethod(Base64.class, "decode", String.class, Integer.TYPE, new XC_MethodHook() {
+				public void beforeHookedMethod(MethodHookParam methodHookParam) {
+					if (methodHookParam.args[0].toString().equals("ZGUucm9idi5hbmRyb2lkLnhwb3NlZC5YcG9zZWRIZWxwZXJz")) {
+						PayHelperUtils.sendmsg(context, "看到我,请截图给技术哦!有精美彩蛋!alipay fuck xposed");
+						methodHookParam.args[0] = "ZGUucm9idi5hbmRyb2lkLnhwb3NlZC5YcG9zZWRIZWxwMTIz";
+					}
+				}
+			});
         } catch (Error | Exception e) {
             e.printStackTrace();
         }
