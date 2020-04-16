@@ -8,7 +8,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -21,7 +20,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.lang.payhelper.CustomApplcation;
-import com.lang.payhelper.rsa.RSAMethod;
+import com.lang.payhelper.utils.rsa.RSAMethod;
 import com.lidroid.xutils.HttpUtils;
 import com.lidroid.xutils.exception.HttpException;
 import com.lidroid.xutils.http.RequestParams;

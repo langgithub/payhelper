@@ -4,9 +4,6 @@ import android.content.Intent;
 import android.util.Log;
 
 
-import com.lang.payhelper.CustomApplcation;
-import com.lang.payhelper.rsa.RSAMethod;
-import com.lang.payhelper.rsa.RSAUtils;
 import com.lang.payhelper.utils.DBManager;
 import com.lang.payhelper.utils.PayHelperUtils;
 import com.lang.sekiro.api.SekiroRequest;
