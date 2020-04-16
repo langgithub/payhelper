@@ -306,6 +306,7 @@ public class AlipayHook {
 			XposedHelpers.findAndHookMethod("com.alipay.mobile.payee.ui.PayeeQRActivity", classLoader, "onCreate", Bundle.class, new XC_MethodHook() {
 				@Override
 				protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+					XposedBridge.log("获取收款二维码start");
 					obj[0] =param.thisObject;
 				}
 			});
