@@ -90,11 +90,6 @@ public class MainActivity<onF> extends Activity{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        if (!d()){
-//            return;
-//        }
-
-
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_main);
         console = (TextView) findViewById(R.id.console);
