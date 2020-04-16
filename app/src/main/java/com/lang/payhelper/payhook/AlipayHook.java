@@ -185,8 +185,10 @@ public class AlipayHook {
             });
 
 			/********************************hook获得二维码url 带金额和备注****************************************/
-			XposedHelpers.findAndHookMethod("com.alipay.mobile.payee.ui.PayeeQRSetMoneyActivity", classLoader, "a",
+			XposedHelpers.findAndHookMethod("com.alipay.mobile.payee.ui.PayeeQRSetMoneyActivity", classLoader, "a",String.class,
 					XposedHelpers.findClass("com.alipay.transferprod.rpc.result.ConsultSetAmountRes", classLoader), new XC_MethodHook() {
+
+
 						@Override
 						protected void afterHookedMethod(MethodHookParam param) throws Throwable {
 							XposedBridge.log("=========支付宝生成完成start========");
@@ -230,6 +232,7 @@ public class AlipayHook {
 
 			//hook设置金额和备注的onCreate方法，自动填写数据并点击
 			XposedHelpers.findAndHookMethod("com.alipay.mobile.payee.ui.PayeeQRSetMoneyActivity", classLoader, "onCreate", Bundle.class, new XC_MethodHook() {
+
 				@Override
 				protected void afterHookedMethod(MethodHookParam param) throws Throwable {
 					XposedBridge.log("========支付宝设置金额start=========");
@@ -353,7 +356,8 @@ public class AlipayHook {
             	}
             	
             });
-        } catch (Error | Exception e) {
+        } catch (Exception e) {
+        	XposedBridge.log(e);
         	PayHelperUtils.sendmsg(context, e.getMessage());
         }
     }
