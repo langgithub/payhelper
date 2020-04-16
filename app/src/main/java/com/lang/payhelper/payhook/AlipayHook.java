@@ -193,14 +193,14 @@ public class AlipayHook {
 						protected void afterHookedMethod(MethodHookParam param) throws Throwable {
 							XposedBridge.log("=========支付宝生成完成start========");
 
-							Field moneyField = XposedHelpers.findField(param.thisObject.getClass(), "g");
-							String money = (String) moneyField.get(param.thisObject);
+//							Field moneyField = XposedHelpers.findField(param.thisObject.getClass(), "g");
+							String money = (String) param.args[0];
 
 							Field markField = XposedHelpers.findField(param.thisObject.getClass(), "c");
 							Object markObject = markField.get(param.thisObject);
 							String mark = (String) XposedHelpers.callMethod(markObject, "getUbbStr");
 
-							Object consultSetAmountRes = param.args[0];
+							Object consultSetAmountRes = param.args[1];
 							Field consultField = XposedHelpers.findField(consultSetAmountRes.getClass(), "qrCodeUrl");
 							String payurl = (String) consultField.get(consultSetAmountRes);
 							XposedBridge.log(money + "  " + mark + "  " + payurl);
