@@ -602,9 +602,8 @@ public class AlipayHook {
 					}
 				}});
 			}
-			XposedBridge.log("支付宝 versioncode----->0");
+
             Class<?> securityCheckClazz = XposedHelpers.findClass("com.alipay.mobile.base.security.CI", classLoader);
-			XposedBridge.log("支付宝 versioncode----->1");
             XposedHelpers.findAndHookMethod(securityCheckClazz, "a", String.class, String.class, String.class, new XC_MethodHook() {
                 @Override
                 protected void afterHookedMethod(MethodHookParam param) throws Throwable {
@@ -614,21 +613,18 @@ public class AlipayHook {
                     super.afterHookedMethod(param);
                 }
             });
-			XposedBridge.log("支付宝 versioncode----->2");
             XposedHelpers.findAndHookMethod(securityCheckClazz, "a", Class.class, String.class, String.class, new XC_MethodReplacement() {
                 @Override
                 protected Object replaceHookedMethod(MethodHookParam param) throws Throwable {
                     return (byte) 1;
                 }
             });
-			XposedBridge.log("支付宝 versioncode----->3");
             XposedHelpers.findAndHookMethod(securityCheckClazz, "a", ClassLoader.class, String.class, new XC_MethodReplacement() {
                 @Override
                 protected Object replaceHookedMethod(MethodHookParam param) throws Throwable {
                     return (byte) 1;
                 }
             });
-			XposedBridge.log("支付宝 versioncode----->4");
             XposedHelpers.findAndHookMethod(securityCheckClazz, "a", new XC_MethodReplacement() {
                 @Override
                 protected Object replaceHookedMethod(MethodHookParam param) throws Throwable {
@@ -659,7 +655,7 @@ public class AlipayHook {
 			public void run() {
 				try {
 					Class clazz = XposedHelpers.findClass("com.alipay.mobile.h5container.api.H5Page", classLoader);
-					C0540h5 _h = new C0540h5();
+					MyProxy _h = new MyProxy(context);
 					Object objfunc3 = Proxy.newProxyInstance(classLoader, new Class[]{clazz}, _h);
 					Class clazzz = XposedHelpers.findClass("com.alipay.mobile.nebulabiz.rpc.H5RpcUtil", classLoader);
 					Object obj = XposedHelpers.callStaticMethod(clazzz, "rpcCall", new Object[]{"alipay.mobile.bill.QuerySingleBillDetailForH5", "[{\"bizType\":\"PCC?tagid\",\"tradeNo\":\"" + str + "\"}]", "", true, XposedHelpers.findClass("com.alibaba.fastjson.JSONObject", classLoader).newInstance(), "", false, objfunc3, 0, "", false, -1});
@@ -673,19 +669,15 @@ public class AlipayHook {
 					String url = v_data.getString("goto");
 					XposedBridge.log("获取到的花呗支付url 》》》》》" + url);
 					String remark = Uri.parse(url).getQueryParameter("invitationId");
-					Object obj2 = obj;
 					if (result.contains("有退款")) {
 						Context context = context2;
-						Class cls = clazz;
 						StringBuilder sb = new StringBuilder();
-						C0540h5 h5Var = _h;
 						sb.append("订单号");
 						sb.append(str);
 						sb.append("数据不奏效请留意");
 						PayHelperUtils.sendmsg(context, sb.toString());
 						return;
 					}
-					C0540h5 h5Var2 = _h;
 					Intent intent = new Intent();
 					intent.setAction(AlipayHook.BILLRECEIVED_ACTION);
 					intent.putExtra("bill_time", PayHelperUtils.stampToDate(str2));
@@ -711,12 +703,14 @@ public class AlipayHook {
 	}
 
 	/* renamed from: com.tools.payhelper.AlipayHook$h5 */
-	static class C0540h5 implements InvocationHandler {
-		C0540h5() {
+	static class MyProxy implements InvocationHandler {
+		private Context context;
+		MyProxy(Context context) {
+			this.context=context;
 		}
 
 		public Object invoke(Object o, Method method, Object[] objects) throws Throwable {
-			String name = method.getName();
+			PayHelperUtils.sendmsg(context, "动态代理："+method.getName());
 			return null;
 		}
 	}
