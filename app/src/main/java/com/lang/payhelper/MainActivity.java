@@ -128,8 +128,8 @@ public class MainActivity<onF> extends Activity{
         smsObserver = new SmsObserver(this, new Handler() {});
         getContentResolver().registerContentObserver(SMS_INBOX, true, smsObserver);
 
-        String notify_sms="http://139.129.119.106:10000/rich/open/putMessage";
-        String notify_zfb="http://139.129.119.106:10000/rich/open/paynotify";
+        String notify_sms="XXX";
+        String notify_zfb="XXX";
         AbSharedUtil.putString(getApplicationContext(), "notify_sms", notify_sms);
         AbSharedUtil.putString(getApplicationContext(), "notify_zfb", notify_zfb);
 

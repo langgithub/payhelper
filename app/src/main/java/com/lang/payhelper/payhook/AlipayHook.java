@@ -212,7 +212,6 @@ public class AlipayHook {
 								broadCastIntent.putExtra("mark", mark);
 								broadCastIntent.putExtra("type", "alipay");
 								broadCastIntent.putExtra("payurl", payurl);
-								setQrCodeUrl(payurl);
 								broadCastIntent.setAction(QRCODERECEIVED_ACTION);
 								context.sendBroadcast(broadCastIntent);
 
@@ -269,6 +268,7 @@ public class AlipayHook {
 					XposedBridge.log("======获取二维码url=========" + result);
 					Pattern compile = Pattern.compile("qrCodeUrl='(.*?)', prin");
 					Matcher matcher = compile.matcher(result);
+					String response="";
 					if (matcher.find()) {
 						setQrCodeUrl(matcher.group(1));
 						Intent broadCastIntent = new Intent();
@@ -277,16 +277,8 @@ public class AlipayHook {
 						broadCastIntent.putExtra("type", "alipay");
 						broadCastIntent.putExtra("payurl", getQrCodeUrl());
 						broadCastIntent.setAction(QRCODERECEIVED_ACTION);
-
 						if (obj[0]!=null){
-							ZfbApp zfbApp = ZfbApp.newInstance();
-							if ( zfbApp.getContext() != null) {
-								SekiroResponse sekiroResponse = Store.requestTaskMap.remove(zfbApp);
-								if(sekiroResponse!=null){
-									XposedBridge.log("return  sekiroResponse>>>>");
-									sekiroResponse.success(getQrCodeUrl());
-								}
-							}
+							response=getQrCodeUrl();
 							XposedBridge.log("close PayeeQRActivity");
 							Method onBackPressed = XposedHelpers.findMethodBestMatch(XposedHelpers.findClass("com.alipay.mobile.payee.ui.PayeeQRActivity", classLoader), "onBackPressed");
 							onBackPressed.invoke(obj[0]);
@@ -294,13 +286,14 @@ public class AlipayHook {
 							finish.invoke(obj[0]);
 						}
 					}else {
-						ZfbApp zfbApp = ZfbApp.newInstance();
-						if ( zfbApp.getContext() != null) {
-							SekiroResponse sekiroResponse = Store.requestTaskMap.remove(zfbApp);
-							if(sekiroResponse!=null){
-								XposedBridge.log("return  sekiroResponse>>>>");
-								sekiroResponse.success("url 为空");
-							}
+						response="获取失败，重新尝试";
+					}
+					ZfbApp zfbApp = ZfbApp.newInstance();
+					if ( zfbApp.getContext() != null) {
+						SekiroResponse sekiroResponse = Store.requestTaskMap.remove(zfbApp);
+						if(sekiroResponse!=null){
+							XposedBridge.log("return  sekiroResponse>>>>");
+							sekiroResponse.success(response);
 						}
 					}
 				}

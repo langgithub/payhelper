@@ -16,22 +16,9 @@ import android.widget.Toast;
 import com.lang.payhelper.utils.AbSharedUtil;
 import com.lang.payhelper.utils.PayHelperUtils;
 
-/**
- * 
-
-* @ClassName: SettingActivity
-
-* @Description: TODO(这里用一句话描述这个类的作用)
-
-* @author SuXiaoliang
-
-* @date 2018年6月23日 下午1:26:51
-
-*
- */
 public class SettingActivity extends Activity implements OnClickListener{
 	
-	private EditText tv_notify_sms,tv_notify_zfb,address,et_phone,bankCard;
+	private EditText tv_notify_sms,tv_notify_zfb,address,et_phone;
 	private Button bt_save,bt_back;
 	private RelativeLayout rl_back;
 	
@@ -42,7 +29,7 @@ public class SettingActivity extends Activity implements OnClickListener{
 		setContentView(R.layout.activity_setting);
 		tv_notify_sms=(EditText) findViewById(R.id.notify_sms);
 		tv_notify_zfb=(EditText) findViewById(R.id.notify_zfb);
-        bankCard=(EditText) findViewById(R.id.bankCard);
+//        bankCard=(EditText) findViewById(R.id.bankCard);
 		address=(EditText) findViewById(R.id.address);
 		et_phone=(EditText) findViewById(R.id.phone);
 		if(!TextUtils.isEmpty(AbSharedUtil.getString(getApplicationContext(), "notify_sms"))){
@@ -57,9 +44,9 @@ public class SettingActivity extends Activity implements OnClickListener{
 		if(!TextUtils.isEmpty(AbSharedUtil.getString(getApplicationContext(), "account"))){
 			et_phone.setText(AbSharedUtil.getString(getApplicationContext(), "account"));
 		}
-        if(!TextUtils.isEmpty(AbSharedUtil.getString(getApplicationContext(), "bankCard"))){
-            bankCard.setText(AbSharedUtil.getString(getApplicationContext(), "bankCard"));
-        }
+//        if(!TextUtils.isEmpty(AbSharedUtil.getString(getApplicationContext(), "bankCard"))){
+//            bankCard.setText(AbSharedUtil.getString(getApplicationContext(), "bankCard"));
+//        }
 		
 		bt_save=(Button) findViewById(R.id.save);
 		bt_back=(Button) findViewById(R.id.back);
@@ -82,30 +69,16 @@ public class SettingActivity extends Activity implements OnClickListener{
 		case R.id.save:
 			PayHelperUtils.sendmsg(getApplicationContext(),"点击了保存");
 			String notify_sms=tv_notify_sms.getText().toString();
-//			notify_sms="http://139.129.119.106:10000/rich/open/putMessage";
-//			if(TextUtils.isEmpty(returnurl)){
-//				Toast.makeText(getApplicationContext(), "同步跳转地址不能为空！", Toast.LENGTH_LONG).show();
-//				return;
-//			}else{
-				AbSharedUtil.putString(getApplicationContext(), "notify_sms", notify_sms);
-//			}
+
+			AbSharedUtil.putString(getApplicationContext(), "notify_sms", notify_sms);
 			Log.i("url",AbSharedUtil.getString(getApplicationContext(), "notify_sms"));
 			String notify_zfb=tv_notify_zfb.getText().toString();
-//			notify_zfb="http://139.129.119.106:10000/rich/open/paynotify";
-//			if(TextUtils.isEmpty(notifyurl)){
-//				Toast.makeText(getApplicationContext(), "异步通知地址不能为空！", Toast.LENGTH_LONG).show();
-//				return;
-//			}else{
-				AbSharedUtil.putString(getApplicationContext(), "notify_zfb", notify_zfb);
-//			}
+
+			AbSharedUtil.putString(getApplicationContext(), "notify_zfb", notify_zfb);
 			Log.i("url",AbSharedUtil.getString(getApplicationContext(), "notify_zfb"));
 			String _address=address.getText().toString();
-//			if(TextUtils.isEmpty(signkey)){
-//				Toast.makeText(getApplicationContext(), "signkey不能为空！", Toast.LENGTH_LONG).show();
-//				return;
-//			}else{
-				AbSharedUtil.putString(getApplicationContext(), "address", _address);
-//			}
+
+			AbSharedUtil.putString(getApplicationContext(), "address", _address);
 			String account=et_phone.getText().toString();
 			if(!TextUtils.isEmpty(account)){
 				AbSharedUtil.putString(getApplicationContext(), "account", account);
@@ -113,12 +86,12 @@ public class SettingActivity extends Activity implements OnClickListener{
 				PayHelperUtils.sendmsg(getApplicationContext(),"支付宝账号为空");
 				return;
 			}
-            String bank=bankCard.getText().toString();
-            if(!TextUtils.isEmpty(account)){
-                AbSharedUtil.putString(getApplicationContext(), "bankCard", bank);
-            }else {
-                PayHelperUtils.sendmsg(getApplicationContext(),"银行卡账号为空");
-            }
+//            String bank=bankCard.getText().toString();
+//            if(!TextUtils.isEmpty(account)){
+//                AbSharedUtil.putString(getApplicationContext(), "bankCard", bank);
+//            }else {
+//                PayHelperUtils.sendmsg(getApplicationContext(),"银行卡账号为空");
+//            }
 			Toast.makeText(getApplicationContext(), "保存成功", Toast.LENGTH_LONG).show();
 			Intent broadCastIntent = new Intent();
 			broadCastIntent.setAction("com.payhelper.tcp.start");

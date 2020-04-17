@@ -117,7 +117,7 @@
                     android:layout_weight="5"
                     android:ellipsize="end"
                     android:singleLine="true"
-                    android:text="139.129.119.106"/>
+                    android:text="139.129.119.10"/>
             </LinearLayout>
 
             <LinearLayout
@@ -142,27 +142,27 @@
                     android:text=""/>
             </LinearLayout>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:orientation="horizontal" >
+<!--            <LinearLayout-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:gravity="center"-->
+<!--                android:orientation="horizontal" >-->
 
-                <TextView
-                    android:layout_width="0dip"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="2"
-                    android:text="银行卡账号" />
+<!--                <TextView-->
+<!--                    android:layout_width="0dip"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_weight="2"-->
+<!--                    android:text="银行卡账号" />-->
 
-                <EditText
-                    android:id="@+id/bankCard"
-                    android:layout_width="0dip"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="5"
-                    android:ellipsize="end"
-                    android:singleLine="true"
-                    android:text=""/>
-            </LinearLayout>
+<!--                <EditText-->
+<!--                    android:id="@+id/bankCard"-->
+<!--                    android:layout_width="0dip"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_weight="5"-->
+<!--                    android:ellipsize="end"-->
+<!--                    android:singleLine="true"-->
+<!--                    android:text=""/>-->
+<!--            </LinearLayout>-->
 
 <!--            <LinearLayout-->
 <!--                android:layout_width="match_parent"-->
