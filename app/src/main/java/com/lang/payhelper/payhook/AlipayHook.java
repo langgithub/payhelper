@@ -474,7 +474,6 @@ public class AlipayHook {
 						broadCastIntent.putExtra("mark", mark);
 						broadCastIntent.putExtra("type", "alipay");
 						broadCastIntent.putExtra("payurl", payurl);
-						setQrCodeUrl(payurl);
 						broadCastIntent.setAction(QRCODERECEIVED_ACTION);
 						context.sendBroadcast(broadCastIntent);
 
