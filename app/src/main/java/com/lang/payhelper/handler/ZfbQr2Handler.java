@@ -29,7 +29,7 @@ public class ZfbQr2Handler implements SekiroRequestHandler {
             // 绑定与xposed通讯
             Store.requestTaskMap.put(zfbApp, sekiroResponse);
             if (zfbApp.getContext()!=null&&je!=null){
-                PayHelperUtils.sendmsg(zfbApp.getContext(),"支付宝二维码url1 handleRequest {'bz':'"+bz+"','je':'"+je+"'}");
+                PayHelperUtils.sendmsg(zfbApp.getContext(),"不带设置支付宝金额备注的二维码url handleRequest {'bz':'"+bz+"','je':'"+je+"'}");
                 DBManager dbManager = new DBManager(zfbApp.getContext().getApplicationContext());
                 if("null".equals(dbManager.getMark(je))){
                     dbManager.addMark(bz,je);

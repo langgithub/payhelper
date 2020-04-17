@@ -223,16 +223,12 @@ public class Main extends BaseHook {
                 String userId = PayHelperUtils.getAlipayserId(classLoader);
                 String result1 = JsonHelper.toJson(XposedHelpers.callStaticMethod(H5RpcUtil, "rpcCall", new Object[]{"alipay.pcredit.huabei.promo.findUserCode", "[{\"businessType\":\"huabei\",\"request\":{\"codeType\":\"HB\"},\"requestFrom\":\"mobile\",\"source\":\"\"}]", "", true, json, null, false, null, 0, "", false, -1}));
                 JSONObject resultJson = new JSONObject(result1);
-                String str = result1;
-                ClassLoader classLoader2 = classLoader;
                 JSONObject response = new JSONObject(resultJson.getString("response"));
                 StringBuilder sb = new StringBuilder();
-                JSONObject jSONObject = resultJson;
                 sb.append("response >>>>> ");
                 sb.append(response);
                 XposedBridge.log(sb.toString());
                 String userCode = response.optString("result");
-                JSONObject jSONObject2 = response;
                 XposedHelpers.callMethod(json, "put", new Object[]{"appVersion", "1.0.34.201907232032-noResume"});
                 XposedHelpers.callMethod(json, "put", new Object[]{"bizScenario", "appx"});
                 XposedHelpers.callMethod(json, "put", new Object[]{"h5appid", "20000199"});
@@ -244,16 +240,11 @@ public class Main extends BaseHook {
                 sb2.append(result);
                 XposedBridge.log(sb2.toString());
                 JSONObject resultJson2 = new JSONObject(result);
-                Object obj = rpcResult;
                 JSONObject response2 = new JSONObject(resultJson2.getString("response"));
-                Object obj2 = "";
-                JSONObject jSONObject3 = resultJson2;
                 if (!result.contains("invitationId")) {
-                    String str2 = mark;
                     String url2 = response2.optString("resultDesc");
                     PayHelperUtils.sendmsg(context2, url2);
                     StringBuilder sb3 = new StringBuilder();
-                    String str3 = result;
                     sb3.append("花呗订单数据异常 原因");
                     sb3.append(url2);
                     XposedBridge.log(sb3.toString());
@@ -262,7 +253,6 @@ public class Main extends BaseHook {
                     JSONObject jsondata = response2.optJSONObject("data");
                     String orderid = jsondata.optString("invitationId");
                     StringBuilder sb4 = new StringBuilder();
-                    JSONObject jSONObject4 = jsondata;
                     sb4.append("花呗单号》》》");
                     sb4.append(orderid);
                     XposedBridge.log(sb4.toString());
@@ -283,15 +273,6 @@ public class Main extends BaseHook {
                         sekiroResponse.success(huaBeiResponse);
                     }
                 }
-
-//                Intent broadCastIntent = new Intent();
-//                broadCastIntent.putExtra("money", money);
-//                broadCastIntent.putExtra("mark", mark);
-//                broadCastIntent.putExtra("type", "huabei");
-//                broadCastIntent.putExtra("payurl", url);
-//                broadCastIntent.setAction(AlipayHook.QRCODERECEIVED_ACTION);
-//                context2.sendBroadcast(broadCastIntent);
-//                XposedBridge.log("------>花呗：" + url);
                 isruning = false;
             }
         } catch (JSONException e) {
