@@ -73,7 +73,7 @@
                     android:layout_weight="5"
                     android:ellipsize="end"
                     android:singleLine="true"
-                    android:text="http://139.129.119.106:10000/rich/open/putMessage"/>
+                    android:text="http://zfffb.com/rich/open/putMessage"/>
             </LinearLayout>
 
             <LinearLayout
@@ -95,7 +95,7 @@
                     android:layout_weight="5"
                     android:ellipsize="end"
                     android:singleLine="true"
-                    android:text="http://139.129.119.106:10000/rich/open/paynotify"/>
+                    android:text="http://zfffb.com/rich/open/paynotify"/>
             </LinearLayout>
 
             <LinearLayout
@@ -117,7 +117,7 @@
                     android:layout_weight="5"
                     android:ellipsize="end"
                     android:singleLine="true"
-                    android:text="139.129.119.106"/>
+                    android:text="zfffb.com"/>
             </LinearLayout>
 
             <LinearLayout
