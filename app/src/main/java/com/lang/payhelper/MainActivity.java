@@ -366,7 +366,7 @@ public class MainActivity<onF> extends Activity{
 
                     notifyapi(type, no, money, mark, bill_time);
                 } else if (intent.getAction().contentEquals(SMSMSG_ACTION)) {
-                    if (intent.getStringExtra("json")!=null && intent.getStringExtra("json").contains("尾号")){
+                    if (intent.getStringExtra("json")!=null){
                         notifyapi("sms",intent.getStringExtra("json"));
                     }
                 }else if (intent.getAction().contentEquals(QRCODERECEIVED_ACTION)) {
