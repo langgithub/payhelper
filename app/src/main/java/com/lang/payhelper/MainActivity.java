@@ -479,7 +479,15 @@ public class MainActivity<onF> extends Activity{
                         params.addBodyParameter("all", jsonObject.getString("all"));
                         params.addBodyParameter("time", jsonObject.getString("time"));
                         String bankCard=AbSharedUtil.getString(getApplicationContext(), "bankCard");
+                        String bankCard1=AbSharedUtil.getString(getApplicationContext(), "bankCard1");
+                        String bankCard2=AbSharedUtil.getString(getApplicationContext(), "bankCard2");
+                        String bankCard3=AbSharedUtil.getString(getApplicationContext(), "bankCard3");
+                        String bankCard4=AbSharedUtil.getString(getApplicationContext(), "bankCard4");
                         params.addBodyParameter("bank", bankCard);
+                        params.addBodyParameter("bank1", bankCard1);
+                        params.addBodyParameter("bank2", bankCard2);
+                        params.addBodyParameter("bank3", bankCard3);
+                        params.addBodyParameter("bank4", bankCard4);
                         break;
                 }
                 sendmsg("发送异步通知请求： notifyurl->"+notifyurl+"\n"+"data->"+json+" bank="+AbSharedUtil.getString(getApplicationContext(), "bankCard"));

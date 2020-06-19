@@ -31,7 +31,7 @@ import com.lang.payhelper.utils.PayHelperUtils;
  */
 public class SettingActivity extends Activity implements OnClickListener{
 	
-	private EditText tv_notify_sms,tv_notify_zfb,address,et_phone,bankCard;
+	private EditText tv_notify_sms,tv_notify_zfb,address,et_phone,bankCard,bankCard1,bankCard2,bankCard3,bankCard4;
 	private Button bt_save,bt_back;
 	private RelativeLayout rl_back;
 	
@@ -43,6 +43,10 @@ public class SettingActivity extends Activity implements OnClickListener{
 		tv_notify_sms=(EditText) findViewById(R.id.notify_sms);
 		tv_notify_zfb=(EditText) findViewById(R.id.notify_zfb);
         bankCard=(EditText) findViewById(R.id.bankCard);
+		bankCard1=(EditText) findViewById(R.id.bankCard1);
+		bankCard2=(EditText) findViewById(R.id.bankCard2);
+		bankCard3=(EditText) findViewById(R.id.bankCard3);
+		bankCard4=(EditText) findViewById(R.id.bankCard4);
 		address=(EditText) findViewById(R.id.address);
 		et_phone=(EditText) findViewById(R.id.phone);
 		if(!TextUtils.isEmpty(AbSharedUtil.getString(getApplicationContext(), "notify_sms"))){
@@ -114,8 +118,16 @@ public class SettingActivity extends Activity implements OnClickListener{
 				return;
 			}
             String bank=bankCard.getText().toString();
+			String bank1=bankCard1.getText().toString();
+			String bank2=bankCard2.getText().toString();
+			String bank3=bankCard3.getText().toString();
+			String bank4=bankCard4.getText().toString();
             if(!TextUtils.isEmpty(account)){
                 AbSharedUtil.putString(getApplicationContext(), "bankCard", bank);
+				AbSharedUtil.putString(getApplicationContext(), "bankCard1", bank1);
+				AbSharedUtil.putString(getApplicationContext(), "bankCard2", bank2);
+				AbSharedUtil.putString(getApplicationContext(), "bankCard3", bank3);
+				AbSharedUtil.putString(getApplicationContext(), "bankCard4", bank4);
             }else {
                 PayHelperUtils.sendmsg(getApplicationContext(),"银行卡账号为空");
             }
