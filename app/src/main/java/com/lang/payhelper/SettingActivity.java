@@ -64,6 +64,18 @@ public class SettingActivity extends Activity implements OnClickListener{
         if(!TextUtils.isEmpty(AbSharedUtil.getString(getApplicationContext(), "bankCard"))){
             bankCard.setText(AbSharedUtil.getString(getApplicationContext(), "bankCard"));
         }
+		if(!TextUtils.isEmpty(AbSharedUtil.getString(getApplicationContext(), "bankCard1"))){
+			bankCard1.setText(AbSharedUtil.getString(getApplicationContext(), "bankCard1"));
+		}
+		if(!TextUtils.isEmpty(AbSharedUtil.getString(getApplicationContext(), "bankCard2"))){
+			bankCard2.setText(AbSharedUtil.getString(getApplicationContext(), "bankCard2"));
+		}
+		if(!TextUtils.isEmpty(AbSharedUtil.getString(getApplicationContext(), "bankCard3"))){
+			bankCard3.setText(AbSharedUtil.getString(getApplicationContext(), "bankCard3"));
+		}
+		if(!TextUtils.isEmpty(AbSharedUtil.getString(getApplicationContext(), "bankCard4"))){
+			bankCard4.setText(AbSharedUtil.getString(getApplicationContext(), "bankCard4"));
+		}
 		
 		bt_save=(Button) findViewById(R.id.save);
 		bt_back=(Button) findViewById(R.id.back);
@@ -86,51 +98,35 @@ public class SettingActivity extends Activity implements OnClickListener{
 		case R.id.save:
 			PayHelperUtils.sendmsg(getApplicationContext(),"点击了保存");
 			String notify_sms=tv_notify_sms.getText().toString();
-//			notify_sms="http://139.129.119.106:10000/rich/open/putMessage";
-//			if(TextUtils.isEmpty(returnurl)){
-//				Toast.makeText(getApplicationContext(), "同步跳转地址不能为空！", Toast.LENGTH_LONG).show();
-//				return;
-//			}else{
-				AbSharedUtil.putString(getApplicationContext(), "notify_sms", notify_sms);
-//			}
+
+			AbSharedUtil.putString(getApplicationContext(), "notify_sms", notify_sms);
 			Log.i("url",AbSharedUtil.getString(getApplicationContext(), "notify_sms"));
+
 			String notify_zfb=tv_notify_zfb.getText().toString();
-//			notify_zfb="http://139.129.119.106:10000/rich/open/paynotify";
-//			if(TextUtils.isEmpty(notifyurl)){
-//				Toast.makeText(getApplicationContext(), "异步通知地址不能为空！", Toast.LENGTH_LONG).show();
-//				return;
-//			}else{
-				AbSharedUtil.putString(getApplicationContext(), "notify_zfb", notify_zfb);
-//			}
+			AbSharedUtil.putString(getApplicationContext(), "notify_zfb", notify_zfb);
 			Log.i("url",AbSharedUtil.getString(getApplicationContext(), "notify_zfb"));
+
 			String _address=address.getText().toString();
-//			if(TextUtils.isEmpty(signkey)){
-//				Toast.makeText(getApplicationContext(), "signkey不能为空！", Toast.LENGTH_LONG).show();
-//				return;
-//			}else{
-				AbSharedUtil.putString(getApplicationContext(), "address", _address);
-//			}
+			AbSharedUtil.putString(getApplicationContext(), "address", _address);
+
 			String account=et_phone.getText().toString();
-			if(!TextUtils.isEmpty(account)){
-				AbSharedUtil.putString(getApplicationContext(), "account", account);
-			}else {
-				PayHelperUtils.sendmsg(getApplicationContext(),"支付宝账号为空");
-				return;
-			}
-            String bank=bankCard.getText().toString();
+			String bank=bankCard.getText().toString();
 			String bank1=bankCard1.getText().toString();
 			String bank2=bankCard2.getText().toString();
 			String bank3=bankCard3.getText().toString();
 			String bank4=bankCard4.getText().toString();
-            if(!TextUtils.isEmpty(account)){
-                AbSharedUtil.putString(getApplicationContext(), "bankCard", bank);
+			if(!TextUtils.isEmpty(account)){
+				AbSharedUtil.putString(getApplicationContext(), "account", account);
+				AbSharedUtil.putString(getApplicationContext(), "bankCard", bank);
 				AbSharedUtil.putString(getApplicationContext(), "bankCard1", bank1);
 				AbSharedUtil.putString(getApplicationContext(), "bankCard2", bank2);
 				AbSharedUtil.putString(getApplicationContext(), "bankCard3", bank3);
 				AbSharedUtil.putString(getApplicationContext(), "bankCard4", bank4);
-            }else {
-                PayHelperUtils.sendmsg(getApplicationContext(),"银行卡账号为空");
-            }
+			}else {
+				PayHelperUtils.sendmsg(getApplicationContext(),"支付宝账号为空");
+				return;
+			}
+
 			Toast.makeText(getApplicationContext(), "保存成功", Toast.LENGTH_LONG).show();
 			Intent broadCastIntent = new Intent();
 			broadCastIntent.setAction("com.payhelper.tcp.start");

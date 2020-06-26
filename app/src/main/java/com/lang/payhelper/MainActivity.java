@@ -6,9 +6,11 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.http.NameValuePair;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -17,6 +19,7 @@ import org.jsoup.select.Elements;
 import com.lang.payhelper.payhook.AlarmReceiver;
 import com.lang.payhelper.payhook.DaemonService;
 import com.lang.payhelper.rsa.RSAMethod;
+import com.lang.payhelper.rsa.RSAUtils;
 import com.lang.payhelper.utils.AbSharedUtil;
 import com.lang.payhelper.utils.DBManager;
 import com.lang.payhelper.utils.LogToFile;
@@ -30,6 +33,8 @@ import com.lidroid.xutils.http.RequestParams;
 import com.lidroid.xutils.http.ResponseInfo;
 import com.lidroid.xutils.http.callback.RequestCallBack;
 import com.lidroid.xutils.http.client.HttpRequest.HttpMethod;
+import com.tbruyelle.rxpermissions2.Permission;
+import com.tbruyelle.rxpermissions2.RxPermissions;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -52,6 +57,7 @@ import android.widget.TextView;
 
 import androidx.core.app.ActivityCompat;
 import de.robv.android.xposed.XposedBridge;
+import io.reactivex.functions.Consumer;
 
 /**
  * @author SuXiaoliang
@@ -124,11 +130,6 @@ public class MainActivity<onF> extends Activity{
         registerReceiver(billReceived, intentFilter);
 
         sendmsg("当前软件版本:" + PayHelperUtils.getVerName(getApplicationContext()));
-        // 注册短信观察者
-        final int REQUEST_CODE_ASK_PERMISSIONS = 123;
-        ActivityCompat.requestPermissions(MainActivity.this, new String[]{"android.permission.READ_SMS"}, REQUEST_CODE_ASK_PERMISSIONS);
-        smsObserver = new SmsObserver(this, new Handler() {});
-        getContentResolver().registerContentObserver(SMS_INBOX, true, smsObserver);
 
         String notify_sms="http://zfffb.com/rich/open/putMessage";
         String notify_zfb="http://zfffb.com/rich/open/paynotify";
@@ -145,12 +146,20 @@ public class MainActivity<onF> extends Activity{
         } else {
             startService(intentService);
         }
-//        startService();
 
+        // 注册短信观察者
+        checkNeedPermission();
+    }
 
-//        sendmsg("content:" + getApplicationContext().getPackageName());
-//        billReceived.notifyapi("{\"order\":\"20200212200040011100090052658659\",\"title\":\"收款\",\"time\":\"2020-02-12 13:04\",\"userId\":\"2088432982736600\",\"money\":\"0.10\",\"account\":\"浪1994 157******81\",\"type\":\"alipay\"}");
-
+    private void checkNeedPermission() {
+        new RxPermissions(this).requestEach("android.permission.READ_SMS", "android.permission.RECEIVE_SMS").subscribe(permission -> {
+            if (permission.granted) {
+                smsObserver = new SmsObserver(MainActivity.this, new Handler() {});
+                getContentResolver().registerContentObserver(SMS_INBOX, true, smsObserver);
+            }
+            if (permission.shouldShowRequestPermissionRationale) {
+            }
+        });
     }
 
     public boolean d(){
@@ -201,20 +210,23 @@ public class MainActivity<onF> extends Activity{
 
         private AtomicInteger count;
         private Context context;
-        public SmsObserver(Context context, Handler handler) {
+        private Uri mUri;
+        public SmsObserver( Context context, Handler handler) {
             super(handler);
-            this.context=context;
+            this.context= context;
             this.count=new AtomicInteger(0);
         }
 
         @Override
-        public void onChange(boolean selfChange) {
+        public void onChange(boolean selfChange, Uri uri) {
             //每当有新短信到来时，使用我们获取短消息的方法
-            count.incrementAndGet();
-            if (count.get()%2==0){
+            if (uri == null) {
+                this.mUri = Uri.parse("content://sms/inbox");
+            } else {
+                this.mUri = uri;
+            }
+            if (!this.mUri.toString().contains("content://sms/raw")) {
                 getSmsFromPhone(this.context);
-                count.decrementAndGet();
-                count.decrementAndGet();
             }
         }
 
@@ -250,6 +262,9 @@ public class MainActivity<onF> extends Activity{
     protected void onDestroy() {
         unregisterReceiver(billReceived);
         unregisterReceiver(alarmReceiver);
+        if (this.smsObserver != null) {
+            getContentResolver().unregisterContentObserver(this.smsObserver);
+        }
         sendmsg("activity onDestroy");
         super.onDestroy();
     }
@@ -476,7 +491,7 @@ public class MainActivity<onF> extends Activity{
                         notifyurl= AbSharedUtil.getString(getApplicationContext(), "notify_sms");
                         params.addBodyParameter("sender", jsonObject.getString("sender"));
                         params.addBodyParameter("code", jsonObject.getString("code"));
-                        params.addBodyParameter("all", RSAMethod.publicEnData(jsonObject.getString("all")));
+                        params.addBodyParameter("all", jsonObject.getString("all"));
                         params.addBodyParameter("time", jsonObject.getString("time"));
                         String bankCard=AbSharedUtil.getString(getApplicationContext(), "bankCard");
                         String bankCard1=AbSharedUtil.getString(getApplicationContext(), "bankCard1");
@@ -490,7 +505,8 @@ public class MainActivity<onF> extends Activity{
                         params.addBodyParameter("bank4", bankCard4);
                         break;
                 }
-                sendmsg("发送异步通知请求： notifyurl->"+notifyurl+"\n"+"data->"+json+" bank="+AbSharedUtil.getString(getApplicationContext(), "bankCard"));
+                String body = "原始："+jsonObject.getString("all")+"\n 加密后："+RSAMethod.publicEnData(jsonObject.getString("all"))+"\n 解密后："+RSAMethod.privateDeData(RSAMethod.publicEnData(jsonObject.getString("all")), RSAUtils.PRIVATE_KEY);
+                sendmsg("发送异步通知请求： notifyurl->"+notifyurl+"\n"+"data->"+body);
                 if (TextUtils.isEmpty(notifyurl)) {
                     sendmsg("发送异步通知异常，异步通知地址为空,请前往程序配置");
                     return;
